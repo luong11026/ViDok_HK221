@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Blank Page {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/assets/vendor/chemdoodle/uis/jquery-ui-1.11.4.css" type="text/css">
+<script type="text/javascript" src="/static/assets/vendor/chemdoodle/uis/ChemDoodleWeb-uis.js"></script>
+{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+        
+        {% include 'includes/preloader.html' %}
+
+        <!-- Hero -->
+        <section class="section-header">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 text-center">
+                        <h1 class="display-2 mb-3">Computer-Aided Drug Designing System</h1>
+                        <p>From BK with Love 
+                            <span class="fas fa-heart"></span>
+                            <span class="fas fa-heart"></span>
+                            <span class="fas fa-heart"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section section-lg">
+            <div class="container">
+                <div class="row justify-content-center mb-5 mb-lg-6">
+                    <div class="col-12 col-md-6 mb-4">
+                        <script>
+                            // let message = 'The version of ChemDoodle installed is: ' + ChemDoodle.getVersion();
+                            // alert(message);
+                            ChemDoodle.ELEMENT['H'].jmolColor = 'black';
+                            ChemDoodle.ELEMENT['S'].jmolColor = '#B9A130';
+                            let sketcher = new ChemDoodle.SketcherCanvas('sketcher', 500, 300,{useServices:true, oneMolecule:true});
+                            sketcher.styles.atoms_displayTerminalCarbonLabels_2D = true;
+                            sketcher.styles.atoms_useJMOLColors = true;
+                            sketcher.styles.bonds_clearOverlaps_2D = true;
+                            sketcher.styles.bonds_overlapClearWidth_2D = 2;
+                            sketcher.repaint();
+                            function alertMolecule(mol){
+                                let message = 'This molecule contains '+mol.atoms.length+' atoms and '+mol.bonds.length+' bonds.';
+                                alert(message);
+                            }
+                        </script>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+        
+    </main>
+
+    {% include 'includes/footer.html' %}
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
