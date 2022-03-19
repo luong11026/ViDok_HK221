@@ -5,9 +5,10 @@ Copyright (c) 2019 - present AppSeed.us
 
 # Python modules
 import os, logging 
+from datetime import datetime
 
 # Flask modules
-from flask               import render_template, request, url_for, redirect, send_from_directory
+from flask               import render_template, request, url_for, redirect, send_from_directory, jsonify
 from flask_login         import login_user, logout_user, current_user, login_required
 from werkzeug.exceptions import HTTPException, NotFound, abort
 from jinja2              import TemplateNotFound
@@ -16,6 +17,8 @@ from jinja2              import TemplateNotFound
 from app        import app, lm, db, bc
 from app.models import Users
 from app.forms  import LoginForm, RegisterForm
+from app.chem_utils import DockingAgent, save_compound
+from app.util   import create_user_folders
 
 # provide login manager with load_user callback
 @lm.user_loader
@@ -64,10 +67,11 @@ def register():
             pw_hash = bc.generate_password_hash(password)
 
             user = Users(username, email, pw_hash)
-
             user.save()
 
-            msg     = 'User created successfully.'     
+            create_user_folders(user.id)
+
+            msg     = 'User created successfully.'
             success = True
 
     else:
@@ -128,6 +132,21 @@ def index(path):
     
     except:
         return render_template('home/page-500.html'), 500
+
+@app.route('/dock', methods=['POST'])
+def dock():
+    if not current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    docking_agent = DockingAgent()
+    data = request.get_json(force=True)
+    
+    compound_name = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ") + ".mol"
+    save_compound(current_user.id, compound_name, data["compound"])
+
+    docking_agent.run(current_user.id, compound_name)
+
+    return jsonify("OK")
 
 # Return sitemap
 @app.route('/sitemap.xml')
