@@ -5,10 +5,11 @@ Copyright (c) 2019 - present AppSeed.us
 
 # Python modules
 import os, logging 
+import json
 from datetime import datetime
 
 # Flask modules
-from flask               import render_template, request, url_for, redirect, send_from_directory, jsonify
+from flask               import render_template, request, url_for, redirect, send_from_directory, jsonify, make_response
 from flask_login         import login_user, logout_user, current_user, login_required
 from werkzeug.exceptions import HTTPException, NotFound, abort
 from jinja2              import TemplateNotFound
@@ -145,8 +146,7 @@ def dock():
     save_compound(current_user.id, compound_name, data["compound"])
 
     docking_agent.run(current_user.id, compound_name)
-
-    return jsonify("OK")
+    return jsonify({"result":"OK"})
 
 # Return sitemap
 @app.route('/sitemap.xml')
