@@ -7,8 +7,8 @@ Copyright (c) 2019 - present AppSeed.us
 import os, logging 
 from datetime import datetime
 
-# Flask modules
-from flask               import render_template, request, url_for, redirect, send_from_directory, jsonify
+# Flask modules``
+from flask               import render_template, request, url_for, redirect, send_from_directory, jsonify, Response
 from flask_login         import login_user, logout_user, current_user, login_required
 from werkzeug.exceptions import HTTPException, NotFound, abort
 from jinja2              import TemplateNotFound
@@ -19,8 +19,9 @@ from app.models import Users
 from app.forms  import LoginForm, RegisterForm
 from app.chem_utils import DockingAgent, save_compound
 from app.util   import create_user_folders
+from app.config import Config
 
-# provide login manager with load_user callback
+# pro   de login manager with load_user callback
 @lm.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
@@ -144,11 +145,28 @@ def dock():
     compound_name = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ") + ".mol"
     save_compound(current_user.id, compound_name, data["compound"])
 
-    docking_agent.run(current_user.id, compound_name)
-
-    return jsonify("OK")
+    result = docking_agent.run(current_user.id, compound_name)
+    return_path = {
+        "receptor": "/download/receptor/" + result["receptor"],
+        "ligand": "/download/ligand/" + result["ligand"]
+    }
+    
+    return jsonify(return_path)
+    
 
 # Return sitemap
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'sitemap.xml')
+
+@app.route("/download/<molecule>/<file_name>", methods= ["GET"])
+def download(molecule, file_name):
+    dir = os.getcwd()
+    if molecule == "receptor":
+        dir += "/" + os.path.join(Config.CHEM_DIR, "receptors")
+    elif molecule == "ligand":
+        dir += "/" + os.path.join(Config.CHEM_DIR, "dockings", str(current_user.id))
+    else:
+        dir += "/"
+    
+    return send_from_directory(directory = dir, path = file_name, as_attachment = False)
