@@ -165,7 +165,7 @@ def download(molecule, file_name):
     dir = os.getcwd()
     if molecule == "receptor":
         dir += "/" + os.path.join(Config.CHEM_DIR, "receptors")
-    elif molecule == "ligand":
+    elif molecule == "ligand":  
         dir += "/" + os.path.join(Config.CHEM_DIR, "dockings", str(current_user.id))
     else:
         dir += "/"
