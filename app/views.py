@@ -19,7 +19,7 @@ from app        import app, lm, db, bc
 from app.models import Users
 from app.forms  import LoginForm, RegisterForm
 from app.chem_utils import DockingAgent, save_compound
-from app.util   import create_user_folders
+from app.util   import create_user_folders, response
 from app.config import Config
 
 # pro   de login manager with load_user callback
@@ -152,7 +152,7 @@ def dock():
         "ligand": "/download/ligand/" + result["ligand"]
     }
     
-    return jsonify(return_path)
+    return response(return_path)
     
 
 # Return sitemap
