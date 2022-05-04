@@ -148,8 +148,8 @@ def dock():
 
     result = docking_agent.run(current_user.id, compound_name)
     return_path = {
-        "receptor": "/download/receptor/" + result["receptor"],
-        "ligand": "/download/ligand/" + result["ligand"]
+        "receptor": "download/receptor/" + result["receptor"],
+        "ligand": "download/ligand/" + result["ligand"]
     }
     
     return response(return_path)
