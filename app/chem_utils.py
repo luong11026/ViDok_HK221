@@ -51,7 +51,7 @@ class DockingAgent(metaclass=Singleton):
         self.converter.SetInFormat("mol")
         self.converter.ReadFile(self.mol, filename)
         self.gen3D.Do(self.mol, "--best")
-        
+
         file_pdbqt = self.convert_IN_OUT(user_id, compound_name, "mol", "pdbqt")
         self.agent.set_ligand_from_file(file_pdbqt)
         self.agent.compute_vina_maps(center=[5, 10, 10], box_size=[100, 100, 100])
@@ -60,8 +60,14 @@ class DockingAgent(metaclass=Singleton):
 
         dest_path = os.path.join(Config.CHEM_DIR, "dockings", str(user_id), "DOCKED"+compound_name.replace(".mol", ".pdbqt"))
         rec_path = receptor_path
-        self.agent.write_pose(dest_path)
-    
+        
+        self.agent.write_pose(dest_path)   
+
+        self.converter.SetInFormat("pdbqt")
+        self.converter.ReadFile(self.mol, dest_path)
+        self.converter.SetOutFormat("pdb")
+        self.converter.WriteFile(self.mol, dest_path.replace(".pdbqt", ".pdb"))
+
         path = {"receptor": rec_path, "ligand": dest_path}
         return path
 
