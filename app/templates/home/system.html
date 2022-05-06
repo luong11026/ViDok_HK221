@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Blank Page {% endblock %} 
+{% block title %} CADD | URA Research Group {% endblock %} 
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
@@ -20,7 +20,7 @@
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-12 col-md-8 text-center">
-                        <h1 class="display-2 mb-3">Computer-Aided Drug Designing System</h1>
+                        <h1 class="display-2 mb-2">Computer-Aided Drug Design System</h1>
                         <p>From BK with Love 
                             <span class="fas fa-heart"></span>
                             <span class="fas fa-heart"></span>
@@ -29,14 +29,17 @@
                     </div>
                 </div>
             </div>
+            <figure class="position-absolute bottom-0 left-0 w-100 d-none d-md-block mb-n2"><svg class="fill-white"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3000 185.4">
+                <path d="M3000,0v185.4H0V0c496.4,115.6,996.4,173.4,1500,173.4S2503.6,115.6,3000,0z"></path>
+            </svg></figure>
         </section>
-        
-        <section class="section section-lg">
-            <div class="container">
-                <div class="row justify-content-center mb-5 mb-lg-6">
-                    <!-- <div class="col-12 col-md-6 text-center mb-4"> -->
 
-                    <!-- for best results, center the entire wrapper -->
+        <div class="section py-0">
+            <div class="container mt-n8 mt-lg-n12 z-2">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-8 pt-2 pt-md-1">
+                        <!-- for best results, center the entire wrapper -->
                     <center>
                         <!-- the chemdoodle div wraps the entire sketcher and forms the application window, we set the font to be used in the window here as well as render a nice gradient -->
                         <div id="chemdoodle" style="font-family:Century Gothic, Tahoma, Geneva, sans-serif;font-size:12px;text-align:left;text-shadow:none;display:inline-block;padding:5px;border-radius:3px;box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);background:linear-gradient(to bottom, rgba(246,248,249,1) 0%,rgba(229,235,238,1) 50%,rgba(215,222,227,1) 51%,rgba(245,247,249,1) 100%);">
@@ -79,6 +82,17 @@
                         cdwindow.draggable({ handle:'#titlebar', stop:function(){ cdwindow.css({width:'auto', height:'auto'}); }, containment:'document'});
                     </script>
 
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <section class="section section-lg">
+            <div class="container">
+                <div class="row justify-content-center mb-5 mb-lg-6">
+                    <!-- <div class="col-12 col-md-6 text-center mb-4"> -->
+
+                    
                     <!-- </div> -->
                 </div>
                 <div id="ngl_view" style="width: 100%; height: 80vh; overflow: hidden;" class = "row justify-content-center mb-5 mb-lg-6"></div>

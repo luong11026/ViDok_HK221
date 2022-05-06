@@ -1,72 +1,6 @@
-<!--
+{% extends "layouts/base.html" %}
 
-=========================================================
-* Pixel Free Bootstrap 5 UI Kit
-=========================================================
-
-* Product Page: https://themesberg.com/product/ui-kit/pixel-free-bootstrap-5-ui-kit
-* Copyright 2021 Themesberg (https://www.themesberg.com)
-
-* Coded by https://themesberg.com
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Contact us if you want to remove it.
-
--->
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
-<!-- Primary Meta Tags -->
-<title>
-    ViDok-BK | URA Research Group
-</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="title" content="Pixel - Free Bootstrap 5 UI Kit">
-<meta name="author" content="Themesberg">
-<meta name="description" content="Open source and free Bootstrap 5 UI Kit featuring 80 UI components, 5 example pages, and a Gulp and Sass workflow.">
-<link rel="canonical" href="https://appseed.us/apps/flask-apps/flask-pixel-bootstrap-uikit">
-
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://demo.themesberg.com/pixel-bootstrap-5-ui-kit">
-<meta property="og:title" content="Pixel - Free Bootstrap 5 UI Kit">
-<meta property="og:description" content="Open source and free Bootstrap 5 UI Kit featuring 80 UI components, 5 example pages, and a Gulp and Sass workflow.">
-<meta property="og:image" content="https://themesberg.s3.us-east-2.amazonaws.com/public/products/pixel-lite/pixel-lite-preview.jpg">
-
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://demo.themesberg.com/pixel-bootstrap-5-ui-kit">
-<meta property="twitter:title" content="Pixel - Free Bootstrap 5 UI Kit">
-<meta property="twitter:description" content="Open source and free Bootstrap 5 UI Kit featuring 80 UI components, 5 example pages, and a Gulp and Sass workflow.">
-<meta property="twitter:image" content="https://themesberg.s3.us-east-2.amazonaws.com/public/products/pixel-lite/pixel-lite-preview.jpg">
-
-<!-- Favicon -->
-<link rel="apple-touch-icon" sizes="120x120" href="static/assets/img/favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="static/assets/img/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="static/assets/img/favicon/favicon-16x16.png">
-<link rel="manifest" href="static/assets/img/favicon/site.webmanifest">
-<link rel="mask-icon" href="static/assets/img/favicon/safari-pinned-tab.svg" color="#ffffff">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="theme-color" content="#ffffff">
-
-<!-- Fontawesome -->
-<link type="text/css" href="static/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
-
-<!-- Pixel CSS -->
-<link type="text/css" href="static/assets/css/pixel.css" rel="stylesheet">
-
-</head>
-<body>
-    
-    {% include 'includes/navigation.html' %}
-
-    <main>
+{% block content %}
 
         {% include 'includes/preloader.html' %}
 
@@ -104,10 +38,10 @@
         </section>
 
         <div class="section py-0">
-            <div class="container mt-n10 mt-lg-n12 z-2">
+            <div class="container mt-n8 mt-lg-n12 z-2">
                 <div class="row justify-content-center">
-                    <div class="col-12 col-md-10"><img src="static/assets/img/pages/bg_dok.jpg"
-                            alt="Pixel Free Mockup"></div>
+                    <div class="col-12 col-md-8"><img src="static/assets/img/pages/bg_dok.jpg"
+                            alt="Docking Image"></div>
                 </div>
             </div>
         </div>
@@ -191,7 +125,4 @@
 
     {% include 'includes/footer.html' %}
 
-    {% include 'includes/scripts.html' %}
-
-</body>
-</html>
+{% endblock content %}
