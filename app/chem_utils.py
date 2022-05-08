@@ -84,8 +84,15 @@ class DockingAgent(metaclass=Singleton):
         return result
 
     def run(self, user_id, compound_name, dtime) -> dict:
-        docking_result = self.docking(user_id, compound_name, dtime)
-        suggestions = self.dss_system.run(docking_result["ligand"])
+        try:
+            docking_result = self.docking(user_id, compound_name, dtime)
+        except:
+            return None
+        
+        try:
+            suggestions = self.dss_system.run(docking_result["ligand"])
+        except:
+            suggestions = []
 
         return {
                 "receptor": os.path.basename(docking_result["receptor"]),

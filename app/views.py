@@ -149,7 +149,11 @@ def dock():
     save_compound(current_user.id, compound_name, data["ligand"])
 
     result = docking_agent.run(current_user.id, compound_name, dtime)
+    if not result:
+        return response({"status": "failed"})
+
     return_result = {
+        "status": "success",
         "receptor": "download/receptor/" + result["receptor"],
         "ligand": "download/ligand/" + result["ligand"],
         "score": result["score"],

@@ -133,7 +133,13 @@
                 </div>
             </div>
         </section>        
-        
+
+        <div class="d-flex justify-content-center" id="spinner" style="position: fixed; top: 0; left: 0; z-index: 9999; width: 100vw; height: 100vh; background: rgba(255, 255, 255, 0.8); transition: opacity 0.2s; visibility: hidden; opacity: 0;">
+            <div class="spinner-border" role="status" style="position: absolute; top: 50%; left: 50%;">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
     </main>
 
     {% include 'includes/footer.html' %}
@@ -256,6 +262,9 @@
         let molFile = ChemDoodle.writeMOLV3(mol);
         originalLigand = molFile;
 
+        document.getElementById("spinner").style.visibility = "visible";
+        document.getElementById("spinner").style.opacity = "1";
+
         $.ajax({
                 url: 'dock',
                 type: 'POST',
@@ -263,8 +272,19 @@
                 data: JSON.stringify({
                     "ligand": molFile
                 })
-            }).done(function(result){
-                view_result(result);
+            }).done(function(result) {
+                var isSuccess = true;
+
+                if (result["status"] == "success") {
+                    view_result(result);
+                } else {
+                    isSuccess = false;
+                }
+                document.getElementById("spinner").style.visibility = "hidden";
+                document.getElementById("spinner").style.opacity = "0";
+
+                if (!isSuccess)
+                    alert("Ligand has some error! Please re-check it!");
             });
     }
 
