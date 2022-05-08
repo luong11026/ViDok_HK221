@@ -4,9 +4,11 @@ from app.dss_system import DSSSystem
 
 import os
 import time
+import numpy as np
 from vina import Vina
 from openbabel import openbabel as ob
-from pymol import cmd
+from rdkit.Geometry import Point3D
+from rdkit.Chem.rdmolfiles import MolFromMolFile, MolToMolFile
 
 def save_compound(user_id, file_name, compound):
     with open(
@@ -14,36 +16,6 @@ def save_compound(user_id, file_name, compound):
                 "w", encoding="utf-8"
              ) as f:
         f.write(compound)
-
-def getbox(selection='sele', extending = 6.0, software='vina'):
-    
-    ([minX, minY, minZ],[maxX, maxY, maxZ]) = cmd.get_extent(selection)
-
-    minX = minX - float(extending)
-    minY = minY - float(extending)
-    minZ = minZ - float(extending)
-    maxX = maxX + float(extending)
-    maxY = maxY + float(extending)
-    maxZ = maxZ + float(extending)
-    
-    SizeX = maxX - minX
-    SizeY = maxY - minY
-    SizeZ = maxZ - minZ
-    CenterX =  (maxX + minX)/2
-    CenterY =  (maxY + minY)/2
-    CenterZ =  (maxZ + minZ)/2
-    
-    cmd.delete('all')
-    
-    if software == 'vina':
-        return {'center': (CenterX, CenterY, CenterZ), 'size': (SizeX, SizeY, SizeZ)}
-    elif software == 'ledock':
-        return {'minX':minX, 'maxX': maxX},{'minY':minY, 'maxY':maxY}, {'minZ':minZ,'maxZ':maxZ}
-    elif software == 'both':
-        return {'center': (CenterX, CenterY, CenterZ), 'size': (SizeX, SizeY, SizeZ)}, ({'minX':minX, 'maxX': maxX},{'minY':minY, 'maxY':maxY}, {'minZ':minZ,'maxZ':maxZ})
-    
-    else:
-        print('software options must be "vina", "ledock" or "both"')
 
 class Singleton(type):
     _instances = {}
@@ -60,31 +32,18 @@ class DockingAgent(metaclass=Singleton):
         self.agent = Vina(sf_name = 'vina')
         self.receptor_path = os.path.join(Config.CHEM_DIR, "receptors", "receptor.pdbqt")
         self.receptor_PDB_clean_H = os.path.join(Config.CHEM_DIR, "receptors", "Mpro_clean_H.pdb")
-
+        self.box_center = [-4.971, 16.522, 68.039]
+        self.box_size = [20, 30, 28]
         self.agent.set_receptor(rigid_pdbqt_filename = self.receptor_path)
         self.converter = ob.OBConversion()
-        self.writer = ob.OBConversion()
-        self.mol = ob.OBMol()
         self.gen3D = ob.OBOp.FindType("gen3D")
         self.dss_system = DSSSystem()
     
-    def convert_IN_OUT(self, user_id, compound_name, IN, OUT) -> str:
-
-        filename = os.path.join(Config.CHEM_DIR, "compounds", str(user_id), compound_name)
+    def convert_IN_OUT(self, ligand_mol, ligand_file, IN, OUT) -> str:
         self.converter.SetInAndOutFormats(IN, OUT) 
-        self.converter.WriteFile(self.mol, filename.replace("."+IN, "."+OUT))
-        file_dest = filename.replace("."+IN, "."+OUT)
+        file_dest = ligand_file.replace("."+IN, "."+OUT)
+        self.converter.WriteFile(ligand_mol, file_dest)
         return file_dest
-    
-    def calculateBox(self, ligand_file):
-        cmd.load(filename=self.receptor_PDB_clean_H, format='pdb', object='prot')
-        cmd.load(filename=ligand_file, format='mol', object='lig')
-
-        docking_box = getbox(selection='lig', extending=5.0, software='vina')
-
-        cmd.delete('all')
-
-        return docking_box["center"], docking_box["size"]
 
     def docking(self, user_id, compound_name, dtime) -> dict:
         """
@@ -93,15 +52,33 @@ class DockingAgent(metaclass=Singleton):
             Convert from .pdbqt -> .mol 
                 --> Write to /dockings/user_id/
         """
-        filename = os.path.join(Config.CHEM_DIR, "compounds", str(user_id), compound_name)
+        ligand_file = os.path.join(Config.CHEM_DIR, "compounds", str(user_id), compound_name)
+        
+        # Generate 3D
         self.converter.SetInFormat("mol")
-        self.converter.ReadFile(self.mol, filename)
-        self.gen3D.Do(self.mol, "--best")
+        ligand_mol = ob.OBMol()
+        self.converter.ReadFile(ligand_mol, ligand_file)
+        self.gen3D.Do(ligand_mol, "--best")
 
-        file_pdbqt = self.convert_IN_OUT(user_id, compound_name, "mol", "pdbqt")
+        self.converter.SetInAndOutFormats("mol", "mol") 
+        self.converter.WriteFile(ligand_mol, ligand_file)
+
+        # Compute centroid and move to centroid
+        ligand_rdkit_mol = MolFromMolFile(ligand_file)
+        conf = ligand_rdkit_mol.GetConformer()
+        ligand_atom_coord = np.array(conf.GetPositions())
+        ligand_centroid = np.mean(ligand_atom_coord, axis=0)
+        for i in range(ligand_rdkit_mol.GetNumAtoms()):
+            x,y,z = ligand_atom_coord[i] + (np.array(self.box_center) - ligand_centroid)
+            conf.SetAtomPosition(i, Point3D(x,y,z))
+        MolToMolFile(ligand_rdkit_mol, ligand_file)
+
+        # Convert to PDBQT
+        self.converter.ReadFile(ligand_mol, ligand_file)
+        file_pdbqt = self.convert_IN_OUT(ligand_mol, ligand_file, "mol", "pdbqt")
         self.agent.set_ligand_from_file(file_pdbqt)
-        box_center, box_size = self.calculateBox(filename)
-        self.agent.compute_vina_maps(center=box_center, box_size=box_size)
+        
+        self.agent.compute_vina_maps(center=self.box_center, box_size=self.box_size)
         self.agent.optimize()
         self.agent.dock(exhaustiveness=20, n_poses=1)
         docking_score = self.agent.score()[0] # Total score
@@ -113,9 +90,9 @@ class DockingAgent(metaclass=Singleton):
 
         # Convert to PDB format
         self.converter.SetInFormat("pdbqt")
-        self.converter.ReadFile(self.mol, dest_path)
+        self.converter.ReadFile(ligand_mol, dest_path)
         self.converter.SetOutFormat("mol")
-        self.converter.WriteFile(self.mol, dest_path_MOL)
+        self.converter.WriteFile(ligand_mol, dest_path_MOL)
 
         # Save information to DB
         user = Users.query.filter_by(id=user_id).first()
