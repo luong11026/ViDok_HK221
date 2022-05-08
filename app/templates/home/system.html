@@ -272,7 +272,7 @@
 
     function submit_compound() {
         let mol = sketcher.getMolecule();
-        let molFile = ChemDoodle.writeMOLV3(mol);
+        let molFile = ChemDoodle.writeMOL(mol);
         originalLigand = molFile;
 
         document.getElementById("spinner").style.visibility = "visible";
