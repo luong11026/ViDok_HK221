@@ -21,3 +21,6 @@ class Config():
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     CHEM_DIR = "chem_data"
+    PHARMACOPHORE_MODEL = "app/data/pharmacophore.json"
+    DATA_FRAGMENT = "app/data/data_fragment.csv"
+    DATA_RECOMMENDATION = "app/data/data_recommendation.csv"

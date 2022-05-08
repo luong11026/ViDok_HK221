@@ -91,11 +91,46 @@
             <div class="container">
                 <div class="row justify-content-center mb-5 mb-lg-6">
                     <!-- <div class="col-12 col-md-6 text-center mb-4"> -->
-
-                    
                     <!-- </div> -->
+                    <div class="accordion" id="accordionSuggestion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    <p class="fw-bold" style="font-size: 1.2rem;">Suggestions</p>
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                                data-bs-parent="#accordionSuggestion">
+                                <div class="accordion-body">
+                                    <button class="btn btn-outline-danger" type="button" onclick="update_ligand(originalLigand)">Reset</button>
+                                    <table class="table table-striped"id="list_suggestions">
+                                        <tbody>
+                                            <tr>
+                                                <th scope="col">No.</th>
+                                                <th scope="col">Type</th>
+                                                <th scope="col">Atom index(es)</th>
+                                                <th scope="col">New Atom(s)</th>
+                                                <th scope="col">Apply</th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="ngl_view" style="width: 100%; height: 80vh; overflow: hidden;" class = "row justify-content-center mb-5 mb-lg-6"></div>
+
+                <div class="row justify-content-center mb-5 mb-lg-6">
+                    <div id="ngl_view" style="width: 100%; height: 80vh; overflow: hidden;" class = "row justify-content-center mb-5 mb-lg-6"></div>
+                </div>
+
+                <div class="row justify-content-center mb-5 mb-lg-6">
+                    <div class="alert alert-info text-center" style="font-size: 1.6rem;" role="alert">
+                        Docking Score: <span class="fw-bold" style="font-size: 1.6rem;" id="docking_score"></span>
+                    </div>
+                </div>
             </div>
         </section>        
         
@@ -109,54 +144,127 @@
 {% block javascripts %}
 <script>
     var stage;
+    var ligandFile = "";
+    var originalLigand = "";
+    var suggestions = [];
 
     document.addEventListener("DOMContentLoaded", function (){
         stage = new NGL.Stage("ngl_view");
     });
     
-    function loadFileReceptor(receptor_url){
+    function loadFileReceptor(receptor_url) {
         stage.removeAllComponents();
         stage.loadFile(receptor_url, { defaultRepresentation: true }).then(function (component) {
             component.autoView(); //auto center screen
         });
     }
     
-    
-    function loadFileLigand(ligand_url){
+    function loadFileLigand(ligand_url) {
         stage.removeAllComponents();
         stage.loadFile(ligand_url, { defaultRepresentation: true }).then(function (component) {
             component.autoView(); //auto center screen
         });
     }
     
-    function loadFileResult(receptor_url, ligand_url){
+    function loadFileResult(receptor_url, ligand_url) {
         stage.removeAllComponents();
         
         stage.loadFile(ligand_url, { defaultRepresentation: true });
         stage.loadFile(receptor_url, { defaultRepresentation: true });
     }
 
-    function view_result(result) {
-        var f_url = result;
-        console.log(result);
-        loadFileResult(result["receptor"], result["ligand"]);
+    function showDockingScore(score) {
+        var elem = document.getElementById('docking_score');
+        elem.innerHTML = score;
     }
 
+    function showSuggestions(list_suggestions) {
+        var sTable = document.getElementById('list_suggestions');
+        sTable.innerHTML = "";
+        var header = sTable.insertRow(0);
+        var c1 = document.createElement('th');
+        var c2 = document.createElement('th');
+        var c3 = document.createElement('th');
+        var c4 = document.createElement('th');
+        var c5 = document.createElement('th');
+        c1.innerHTML = "No.";
+        c2.innerHTML = "Type";
+        c3.innerHTML = "Atom index(es)";
+        c4.innerHTML = "New Atom(s)";
+        c5.innerHTML = "Apply";
+        header.appendChild(c1);
+        header.appendChild(c2);
+        header.appendChild(c3);
+        header.appendChild(c4);
+        header.appendChild(c5);
+
+        list_suggestions.forEach((suggestion, idx) => {
+            newRow = sTable.insertRow(-1);
+            var c1 = document.createElement('td');
+            var c2 = document.createElement('td');
+            var c3 = document.createElement('td');
+            var c4 = document.createElement('td');
+            var c5 = document.createElement('td');
+            c1.innerHTML = idx;
+            c2.innerHTML = suggestion["type"];
+            c3.innerHTML = suggestion["atom_idx"];
+            c4.innerHTML = suggestion["fragment"];
+            apply_button = document.createElement('button');
+            apply_button.className = "btn btn-outline-tertiary";
+            apply_button.innerHTML = "Apply";
+            apply_button.onclick = function(event) {
+                apply_suggestion(idx);
+            };
+            c5.appendChild(apply_button);
+            newRow.appendChild(c1);
+            newRow.appendChild(c2);
+            newRow.appendChild(c3);
+            newRow.appendChild(c4);
+            newRow.appendChild(c5);
+        });
+    }
+
+    function view_result(result) {
+        ligandFile = result["ligand"];
+        suggestions = result["suggestions"];
+
+        showDockingScore(result["score"]);
+        loadFileResult(result["receptor"], result["ligand"]);
+        showSuggestions(result["suggestions"]);
+    }
+
+    function update_ligand(molString) {
+        var newMol = ChemDoodle.readMOL(molString);
+        sketcher.loadMolecule(newMol);
+    }
+
+    function apply_suggestion(sIdx) {
+        var suggestion_data = suggestions[sIdx];
+        suggestion_data["ligand"] = ligandFile;
+        $.ajax({
+                url: 'apply',
+                type: 'POST',
+                dataType: 'JSON',
+                data: JSON.stringify(suggestion_data)
+            }).done(function(result){
+                update_ligand(result["ligand"]);
+            });
+    }
 
     function submit_compound() {
         let mol = sketcher.getMolecule();
         let molFile = ChemDoodle.writeMOLV3(mol);
-        console.log(molFile);
+        originalLigand = molFile;
 
         $.ajax({
                 url: 'dock',
                 type: 'POST',
                 dataType: 'JSON',
                 data: JSON.stringify({
-                    "compound": molFile
+                    "ligand": molFile
                 })
             }).done(function(result){
-                view_result(result)
+                view_result(result);
             });
     }
 

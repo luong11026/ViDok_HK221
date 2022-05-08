@@ -19,6 +19,7 @@ from app        import app, lm, db, bc
 from app.models import Users
 from app.forms  import LoginForm, RegisterForm
 from app.chem_utils import DockingAgent, save_compound
+from app.dss_system import DSSSystem
 from app.util   import create_user_folders, response
 from app.config import Config
 
@@ -143,17 +144,31 @@ def dock():
     docking_agent = DockingAgent()
     data = request.get_json(force=True)
     
-    compound_name = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ") + ".mol"
-    save_compound(current_user.id, compound_name, data["compound"])
+    dtime = datetime.utcnow()
+    compound_name = dtime.strftime("%Y-%m-%dT%H:%M:%SZ") + ".mol"
+    save_compound(current_user.id, compound_name, data["ligand"])
 
-    result = docking_agent.run(current_user.id, compound_name)
-    return_path = {
+    result = docking_agent.run(current_user.id, compound_name, dtime)
+    return_result = {
         "receptor": "download/receptor/" + result["receptor"],
-        "ligand": "download/ligand/" + result["ligand"]
+        "ligand": "download/ligand/" + result["ligand"],
+        "score": result["score"],
+        "suggestions": result["suggestions"]
     }
     
-    return response(return_path)
+    return response(return_result)
     
+@app.route('/apply', methods=['POST'])
+def apply_suggestion():
+    if not current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    data = request.get_json(force=True)
+    ligand_file = os.path.join(Config.CHEM_DIR, "dockings", str(current_user.id), 
+                               os.path.basename(data["ligand"]))
+
+    molString = DSSSystem().apply(ligand_file, data)
+    return response({"ligand": molString})
 
 # Return sitemap
 @app.route('/sitemap.xml')
