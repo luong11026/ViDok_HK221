@@ -157,7 +157,8 @@ def dock():
         "receptor": "download/receptor/" + result["receptor"],
         "ligand": "download/ligand/" + result["ligand"],
         "score": result["score"],
-        "suggestions": result["suggestions"]
+        "suggestions": result["suggestions"],
+        "time": result["time"]
     }
     
     return response(return_result)

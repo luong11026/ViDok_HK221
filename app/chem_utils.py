@@ -3,7 +3,7 @@ from app.models import Users, Ligands
 from app.dss_system import DSSSystem
 
 import os
-import json 
+import time
 from vina import Vina
 from openbabel import openbabel as ob
 
@@ -84,6 +84,8 @@ class DockingAgent(metaclass=Singleton):
         return result
 
     def run(self, user_id, compound_name, dtime) -> dict:
+        start_time = time.time()
+
         try:
             docking_result = self.docking(user_id, compound_name, dtime)
         except:
@@ -94,11 +96,14 @@ class DockingAgent(metaclass=Singleton):
         except:
             suggestions = []
 
+        end_time = time.time()
+
         return {
                 "receptor": os.path.basename(docking_result["receptor"]),
                 "ligand": os.path.basename(docking_result["ligand"]),
                 "score": docking_result["score"],
-                "suggestions": suggestions
+                "suggestions": suggestions,
+                "time": "%.3f" % (end_time - start_time)
                }
 
 

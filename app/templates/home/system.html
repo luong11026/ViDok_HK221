@@ -131,6 +131,13 @@
                         Docking Score: <span class="fw-bold" style="font-size: 1.6rem;" id="docking_score"></span>
                     </div>
                 </div>
+
+                <div class="row justify-content-center mb-5 mb-lg-6">
+                    <div class="alert alert-light text-center" style="font-size: 1.2rem;" role="alert">
+                        Runtime: <span class="fw-bold" style="font-size: 1.2rem;" id="runtime"></span>
+                    </div>
+                </div>
+
             </div>
         </section>        
 
@@ -184,6 +191,11 @@
         elem.innerHTML = score;
     }
 
+    function showRuntime(time) {
+        var elem = document.getElementById('runtime');
+        elem.innerHTML = time + 's';
+    }
+
     function showSuggestions(list_suggestions) {
         var sTable = document.getElementById('list_suggestions');
         sTable.innerHTML = "";
@@ -234,6 +246,7 @@
         ligandFile = result["ligand"];
         suggestions = result["suggestions"];
 
+        showRuntime(result["time"]);
         showDockingScore(result["score"]);
         loadFileResult(result["receptor"], result["ligand"]);
         showSuggestions(result["suggestions"]);
