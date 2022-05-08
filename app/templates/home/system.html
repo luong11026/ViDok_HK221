@@ -298,6 +298,11 @@
 
                 if (!isSuccess)
                     alert("Ligand has some error! Please re-check it!");
+            }).fail(function() {
+                document.getElementById("spinner").style.visibility = "hidden";
+                document.getElementById("spinner").style.opacity = "0";
+
+                alert('There are some error! Try again!'); 
             });
     }
 
