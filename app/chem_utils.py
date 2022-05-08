@@ -6,8 +6,7 @@ import os
 import time
 from vina import Vina
 from openbabel import openbabel as ob
-
-receptor_path = os.path.join(Config.CHEM_DIR, "receptors", "receptor.pdbqt")
+from pymol import cmd
 
 def save_compound(user_id, file_name, compound):
     with open(
@@ -15,6 +14,36 @@ def save_compound(user_id, file_name, compound):
                 "w", encoding="utf-8"
              ) as f:
         f.write(compound)
+
+def getbox(selection='sele', extending = 6.0, software='vina'):
+    
+    ([minX, minY, minZ],[maxX, maxY, maxZ]) = cmd.get_extent(selection)
+
+    minX = minX - float(extending)
+    minY = minY - float(extending)
+    minZ = minZ - float(extending)
+    maxX = maxX + float(extending)
+    maxY = maxY + float(extending)
+    maxZ = maxZ + float(extending)
+    
+    SizeX = maxX - minX
+    SizeY = maxY - minY
+    SizeZ = maxZ - minZ
+    CenterX =  (maxX + minX)/2
+    CenterY =  (maxY + minY)/2
+    CenterZ =  (maxZ + minZ)/2
+    
+    cmd.delete('all')
+    
+    if software == 'vina':
+        return {'center': (CenterX, CenterY, CenterZ), 'size': (SizeX, SizeY, SizeZ)}
+    elif software == 'ledock':
+        return {'minX':minX, 'maxX': maxX},{'minY':minY, 'maxY':maxY}, {'minZ':minZ,'maxZ':maxZ}
+    elif software == 'both':
+        return {'center': (CenterX, CenterY, CenterZ), 'size': (SizeX, SizeY, SizeZ)}, ({'minX':minX, 'maxX': maxX},{'minY':minY, 'maxY':maxY}, {'minZ':minZ,'maxZ':maxZ})
+    
+    else:
+        print('software options must be "vina", "ledock" or "both"')
 
 class Singleton(type):
     _instances = {}
@@ -29,7 +58,10 @@ class DockingAgent(metaclass=Singleton):
     """
     def __init__(self) -> None:
         self.agent = Vina(sf_name = 'vina')
-        self.agent.set_receptor(rigid_pdbqt_filename = receptor_path)
+        self.receptor_path = os.path.join(Config.CHEM_DIR, "receptors", "receptor.pdbqt")
+        self.receptor_PDB_clean_H = os.path.join(Config.CHEM_DIR, "receptors", "Mpro_clean_H.pdb")
+
+        self.agent.set_receptor(rigid_pdbqt_filename = self.receptor_path)
         self.converter = ob.OBConversion()
         self.writer = ob.OBConversion()
         self.mol = ob.OBMol()
@@ -44,6 +76,16 @@ class DockingAgent(metaclass=Singleton):
         file_dest = filename.replace("."+IN, "."+OUT)
         return file_dest
     
+    def calculateBox(self, ligand_file):
+        cmd.load(filename=self.receptor_PDB_clean_H, format='pdb', object='prot')
+        cmd.load(filename=ligand_file, format='mol', object='lig')
+
+        docking_box = getbox(selection='lig', extending=5.0, software='vina')
+
+        cmd.delete('all')
+
+        return docking_box["center"], docking_box["size"]
+
     def docking(self, user_id, compound_name, dtime) -> dict:
         """
             Convert .mol -> .pdbqt to execute docking process
@@ -58,14 +100,14 @@ class DockingAgent(metaclass=Singleton):
 
         file_pdbqt = self.convert_IN_OUT(user_id, compound_name, "mol", "pdbqt")
         self.agent.set_ligand_from_file(file_pdbqt)
-        self.agent.compute_vina_maps(center=[-4.971, 16.522, 68.039], box_size=[20, 30, 28])
+        box_center, box_size = self.calculateBox(filename)
+        self.agent.compute_vina_maps(center=box_center, box_size=box_size)
         self.agent.optimize()
         self.agent.dock(exhaustiveness=20, n_poses=1)
         docking_score = self.agent.score()[0] # Total score
 
         dest_path = os.path.join(Config.CHEM_DIR, "dockings", str(user_id), "DOCKED"+compound_name.replace(".mol", ".pdbqt"))
         dest_path_MOL = dest_path.replace(".pdbqt", ".mol")
-        rec_path = receptor_path
         
         self.agent.write_pose(dest_path) 
 
@@ -80,7 +122,7 @@ class DockingAgent(metaclass=Singleton):
         ligand = Ligands(dtime, dest_path_MOL, docking_score, user.user)
         ligand.save()
 
-        result = {"receptor": rec_path, "ligand": dest_path_MOL, "score": docking_score}
+        result = {"receptor": self.receptor_path, "ligand": dest_path_MOL, "score": docking_score}
         return result
 
     def run(self, user_id, compound_name, dtime):
