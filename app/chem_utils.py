@@ -58,7 +58,7 @@ class DockingAgent(metaclass=Singleton):
 
         file_pdbqt = self.convert_IN_OUT(user_id, compound_name, "mol", "pdbqt")
         self.agent.set_ligand_from_file(file_pdbqt)
-        self.agent.compute_vina_maps(center=[5, 10, 10], box_size=[100, 100, 100])
+        self.agent.compute_vina_maps(center=[-4.971, 16.522, 68.039], box_size=[20, 30, 28])
         self.agent.optimize()
         self.agent.dock(exhaustiveness=20, n_poses=1)
         docking_score = self.agent.score()[0] # Total score
