@@ -83,7 +83,7 @@ class DockingAgent(metaclass=Singleton):
         result = {"receptor": rec_path, "ligand": dest_path_MOL, "score": docking_score}
         return result
 
-    def run(self, user_id, compound_name, dtime) -> dict:
+    def run(self, user_id, compound_name, dtime):
         start_time = time.time()
 
         try:
