@@ -88,7 +88,7 @@ class DockingAgent(metaclass=Singleton):
         
         self.agent.write_pose(dest_path) 
 
-        # Convert to PDB format
+        # Convert to MOL format
         self.converter.SetInFormat("pdbqt")
         self.converter.ReadFile(ligand_mol, dest_path)
         self.converter.SetOutFormat("mol")
