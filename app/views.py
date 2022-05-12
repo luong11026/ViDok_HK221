@@ -189,6 +189,7 @@ def view_ligands():
     if only_me:
         list_ligands = list_ligands.filter_by(user=current_user.user)
 
+    total = list_ligands.count()
     list_ligands = list_ligands.paginate(page_number, block_length, False)
     record_items = list_ligands.items
 
@@ -205,7 +206,7 @@ def view_ligands():
         }
         results.append(ligand)
 
-    return response({"list_ligands": results, "total": Ligands.query.count()})
+    return response({"list_ligands": results, "total": total})
 
 # Return sitemap
 @app.route('/sitemap.xml')
