@@ -118,6 +118,7 @@
     function setOnlyMeRevert() {
         // Change only_me
         only_me = !only_me;
+        page_number = 1;
         only_me_dom = document.getElementById("only_me");
         if (only_me == true) {
             only_me_dom.className = "btn btn-primary";
