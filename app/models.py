@@ -14,7 +14,7 @@ class Users(db.Model, UserMixin):
     user     = db.Column(db.String(64),  unique = True, nullable=False)
     email    = db.Column(db.String(120), unique = True, nullable=False)
     password = db.Column(db.String(500), nullable=False)
-    ligands     = db.relationship('Ligands', backref='Users', lazy=True)
+    ligands  = db.relationship('Ligands', backref='Users', lazy=True)
 
     def __init__(self, user, email, password):
         self.user       = user

@@ -104,18 +104,22 @@
                                 data-bs-parent="#accordionSuggestion">
                                 <div class="accordion-body">
                                     <button class="btn btn-outline-danger" type="button" onclick="update_ligand(originalLigand)">Reset</button>
-                                    <table class="table table-striped" id="list_suggestions">
-                                        <tbody>
-                                            <tr>
-                                                <th scope="col">No.</th>
-                                                <th scope="col">Type</th>
-                                                <th scope="col">Atom index(es)</th>
-                                                <th scope="col">New Atom(s)</th>
-                                                <th scope="col">Apply</th>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    
+                                    <div class="table-responsive-sm">
+                                        <table class="table table-striped" id="list_suggestions">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">No.</th>
+                                                    <th scope="col">Type</th>
+                                                    <th scope="col">Atom index(es)</th>
+                                                    <th scope="col">New Atom(s)</th>
+                                                    <th scope="col">Apply</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -203,22 +207,6 @@ M  END";
     function showSuggestions(list_suggestions) {
         var sTable = document.getElementById('list_suggestions');
         sTable.innerHTML = "";
-        var header = sTable.insertRow(0);
-        var c1 = document.createElement('th');
-        var c2 = document.createElement('th');
-        var c3 = document.createElement('th');
-        var c4 = document.createElement('th');
-        var c5 = document.createElement('th');
-        c1.innerHTML = "No.";
-        c2.innerHTML = "Type";
-        c3.innerHTML = "Atom index(es)";
-        c4.innerHTML = "New Atom(s)";
-        c5.innerHTML = "Apply";
-        header.appendChild(c1);
-        header.appendChild(c2);
-        header.appendChild(c3);
-        header.appendChild(c4);
-        header.appendChild(c5);
 
         list_suggestions.forEach((suggestion, idx) => {
             newRow = sTable.insertRow(-1);
@@ -244,6 +232,23 @@ M  END";
             newRow.appendChild(c4);
             newRow.appendChild(c5);
         });
+
+        var header = sTable.createTHead().insertRow(0);;
+        var c1 = document.createElement('th');
+        var c2 = document.createElement('th');
+        var c3 = document.createElement('th');
+        var c4 = document.createElement('th');
+        var c5 = document.createElement('th');
+        c1.innerHTML = "No.";
+        c2.innerHTML = "Type";
+        c3.innerHTML = "Atom index(es)";
+        c4.innerHTML = "New Atom(s)";
+        c5.innerHTML = "Apply";
+        header.appendChild(c1);
+        header.appendChild(c2);
+        header.appendChild(c3);
+        header.appendChild(c4);
+        header.appendChild(c5);
     }
 
     function view_result(result) {

@@ -16,7 +16,7 @@ from jinja2              import TemplateNotFound
 
 # App modules
 from app        import app, lm, db, bc
-from app.models import Users
+from app.models import Users, Ligands
 from app.forms  import LoginForm, RegisterForm
 from app.chem_utils import DockingAgent, save_compound
 from app.dss_system import DSSSystem
@@ -154,8 +154,8 @@ def dock():
 
     return_result = {
         "status": "success",
-        "receptor": "download/receptor/" + result["receptor"],
-        "ligand": "download/ligand/" + result["ligand"],
+        "receptor": ("download/%s/receptor/" % current_user.user) + result["receptor"],
+        "ligand": ("download/%s/ligand/" % current_user.user) + result["ligand"],
         "score": result["score"],
         "suggestions": result["suggestions"],
         "time": result["time"]
@@ -175,18 +175,55 @@ def apply_suggestion():
     molString = DSSSystem().apply(ligand_file, data)
     return response({"ligand": molString})
 
+@app.route('/view', methods=['POST'])
+def view_ligands():
+    if not current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    data = request.get_json(force=True)
+    block_length = data["block_length"]
+    page_number = data["page_number"]
+    only_me = data["only_me"]
+
+    list_ligands = Ligands.query.order_by(Ligands.score)
+    if only_me:
+        list_ligands = list_ligands.filter_by(user=current_user.user)
+
+    list_ligands = list_ligands.paginate(page_number, block_length, False)
+    record_items = list_ligands.items
+
+    results = []
+    start = (page_number - 1) * block_length
+    for i, ligand in enumerate(record_items):
+        ligand_name = os.path.basename(ligand.path)
+        ligand = {
+            "no.":  start + i + 1,
+            "name": ligand_name,
+            "score": ligand.score,
+            "user": ligand.user,
+            "download": "download/" + ligand.user + "/ligand/" + ligand_name
+        }
+        results.append(ligand)
+
+    return response({"list_ligands": results, "total": Ligands.query.count()})
+
 # Return sitemap
 @app.route('/sitemap.xml')
 def sitemap():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'sitemap.xml')
 
-@app.route("/download/<molecule>/<file_name>", methods= ["GET"])
-def download(molecule, file_name):
+@app.route("/download/<user>/<molecule>/<file_name>", methods= ["GET"])
+def download(user, molecule, file_name):
+    if not current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    user = Users.query.filter_by(user=user).first()
+
     dir = os.getcwd()
     if molecule == "receptor":
         dir += "/" + os.path.join(Config.CHEM_DIR, "receptors")
     elif molecule == "ligand":  
-        dir += "/" + os.path.join(Config.CHEM_DIR, "dockings", str(current_user.id))
+        dir += "/" + os.path.join(Config.CHEM_DIR, "dockings", str(user.id))
     else:
         dir += "/"
     
