@@ -1,14 +1,14 @@
 {
-    "name": "Pixel Pro",
-    "short_name": "Pixel Pro",
+    "name": "ViDok-BK | URA Research Group",
+    "short_name": "ViDok-BK",
     "icons": [
         {
-            "src": "/android-chrome-192x192.png",
+            "src": "static/assets/img/favicon/android-chrome-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/android-chrome-256x256.png",
+            "src": "static/assets/img/favicon/android-chrome-256x256.png",
             "sizes": "256x256",
             "type": "image/png"
         }
