@@ -38,7 +38,7 @@
         <div class="section py-0">
             <div class="container mt-n8 mt-lg-n12 z-2">
                 <div class="row justify-content-center">
-                    <div class="col-12 col-md-8 pt-2 pt-md-1">
+                    <div class="col-12 col-md-12 pt-2 pt-md-1">
                         <!-- for best results, center the entire wrapper -->
                     <center>
                         <!-- the chemdoodle div wraps the entire sketcher and forms the application window, we set the font to be used in the window here as well as render a nice gradient -->
@@ -56,7 +56,7 @@
                             ChemDoodle.ELEMENT['S'].jmolColor = '#B9A130';
 
                             // the sketcher is initialized here, setting the resizable and floatDrawTools options to true
-                            let sketcher = new ChemDoodle.SketcherCanvas('sketcher', 650, 400, {resizable:true, floatDrawTools:true, oneMolecule:true});
+                            let sketcher = new ChemDoodle.SketcherCanvas('sketcher', screen.width*0.66, 400, {resizable:true, floatDrawTools:true, oneMolecule:true});
                             
                             // we don't load any content, so we have to manually call the repaint method to show the sketcher, alternatively, you can preload content into the sketcher
                             sketcher.styles.atoms_displayTerminalCarbonLabels_2D = true;
