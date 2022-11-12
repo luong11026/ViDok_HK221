@@ -1,0 +1,194 @@
+{% extends "layouts/base.html" %}
+
+<!-- Specific Page CSS goes HERE  -->
+
+{% block stylesheets %}
+<!-- ChemDoodle -->
+<style>
+  #chart-wrapper {
+    background-color: white;
+    width: 1000px;
+    height: 600px;
+  }
+
+  #graph {
+    background-color: white;
+    margin: 50px 0;
+  }
+
+  span {
+    margin: 0 5px;
+    font-weight: bold;
+  }
+</style>
+{% endblock stylesheets %} {% block content %} {% include
+'includes/preloader.html' %}
+
+<section class="section-header bg-secondary text-white" id="header">
+  <div class="container">
+    <div class="row justify-content-between align-items-center">
+      <div class="col-12 col-md-7 col-lg-6 text-center text-md-left">
+        <h1 class="display-2 mb-4">
+          ViDok-BK <br class="d-none d-md-inline" />CADD System
+        </h1>
+        <p class="lead mb-4 text-muted">
+          Our CADD system aims to provide a professinal AI-assisted drug design
+          tool for community. Currently, our system focuses on discovering
+          candidate compounds against the Coronavirus.
+        </p>
+      </div>
+      <div class="col-12 col-md-5 d-none d-md-block text-center">
+        <img
+          src="static/assets/img/illustrations/about-illustration.svg"
+          alt=""
+        />
+      </div>
+    </div>
+    <figure
+      class="position-absolute bottom-0 left-0 w-100 d-none d-md-block mb-n2"
+    >
+      <svg
+        class="fill-white"
+        version="1.1"
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        x="0px"
+        y="0px"
+        viewBox="0 0 1920 43.4"
+        style="enable-background: new 0 0 1920 43.4"
+        xml:space="preserve"
+      >
+        <path
+          d="M0,23.3c0,0,405.1-43.5,697.6,0c316.5,1.5,108.9-2.6,480.4-14.1c0,0,139-12.2,458.7,14.3 c0,0,67.8,19.2,283.3-22.7v35.1H0V23.3z"
+        ></path>
+      </svg>
+    </figure>
+  </div>
+</section>
+
+<!-- <section class="section section-md" id="graph"> -->
+<div class="row align-items-center justify-content-around" id="graph">
+  <div class="col-8" id="chart-wrapper">
+    <canvas id="myChart" max-width="500" max-height="500"></canvas>
+  </div>
+
+  <div class="col-4" id="information">
+    <h2 class="h1 mb-5">AN OVERVIEW OF THE SYSTEM</h2>
+    <p class="lead">TOTAL SUBMISSION: <span id="submission"></span></p>
+    <p class="lead">TOTAL USER: <span id="user"></span></p>
+    <p class="lead">MAX DOCKING SCORE:<span id="max_score"></span></p>
+    <p class="lead">AVERAGE DOCKING SCORE:<span id="avg_score"></span></p>
+    <p class="lead">MIN DOCKING SCORE:<span id="min_score"></span></p>
+  </div>
+  <!-- <img src="static/assets/img/signature.svg" alt="signature" class="mt-4" width="150"> -->
+</div>
+<!-- </section> -->
+
+{% include 'includes/footer.html' %} {% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+  // Chart configuration
+  const ctx = document.getElementById("myChart").getContext("2d");
+
+  let delayed;
+
+  const labels = [1, 2, 3, 4, 5, 6, 7];
+  const data = {
+    labels: labels,
+    datasets: [
+      {
+        label: "Total submission per day",
+        data: [2, 1, 4, 5, 11, 3, 9],
+        fill: true,
+        backgroundColor: "#DFF8FF",
+        borderColor: "#009FCC",
+        tension: 0.1,
+      },
+    ],
+  };
+
+  const config = {
+    type: "line",
+    data: data,
+    options: {
+      responsive: true,
+      animation: {
+        onComplete: () => {
+          delayed = true;
+        },
+        delay: (context) => {
+          let delay = 0;
+          if (
+            context.type === "data" &&
+            context.mode === "default" &&
+            !delayed
+          ) {
+            delay = context.dataIndex * 600 + context.datasetIndex * 1000;
+          }
+          return delay;
+        },
+      },
+      maintainAspectRatio: false,
+      plugins: {
+        title: {
+          display: true,
+          text: "Total submissions per day in the last 7 days",
+        },
+        legend: {
+          display: false,
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  };
+
+  const myChart = new Chart(ctx, config);
+
+  // Other configurations
+  let total_submisison = 0, total_user, max_score, min_score, avg_score;
+
+  window.onload = (event) => {
+    loadData();
+  };
+
+  function loadData() {
+    $.ajax({
+      url: "overview",
+      type: "POST",
+      dataType: "JSON",
+    })
+      .done(function (results) {
+        total_submission = results["total_sub"];
+        total_user = results["total_us"];
+        min_score = results["min_score"];
+        max_score = results["max_score"];
+        avg_score = results["avg_score"];
+
+        console.log(total_submission);
+        console.log(total_user);
+        console.log(min_score); 
+        console.log(max_score);
+        console.log(avg_score);
+
+        document.querySelector("#submission").innerHTML = results["total_sub"];
+        document.querySelector("#user").innerHTML = results["total_us"];
+        document.querySelector("#min_score").innerHTML = results["min_score"].toFixed(3);
+        document.querySelector("#max_score").innerHTML = results["max_score"].toFixed(3);
+        document.querySelector("#avg_score").innerHTML = results["avg_score"].toFixed(3);
+      })
+      .fail(function () {
+        alert("There are some error! Please refresh page!");
+      });
+  }
+
+  function change() {
+
+  }
+</script>
+{% endblock javascripts %}

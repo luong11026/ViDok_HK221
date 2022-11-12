@@ -16,11 +16,19 @@ class Users(db.Model, UserMixin):
     password = db.Column(db.String(500), nullable=False)
     ligands  = db.relationship('Ligands', backref='Users', lazy=True)
 
-    def __init__(self, user, email, password):
+    fname = db.Column(db.String(64), nullable=False)
+    lname = db.Column(db.String(64), nullable=False)
+    phone_num = db.Column(db.Integer, nullable=False)
+    confirmed = db.Column(db.Boolean, nullable=False)
+
+    def __init__(self, user, email, password, fname, lname, phone_num, confirmed):
         self.user       = user
         self.password   = password
         self.email      = email
-
+        self.fname = fname
+        self.lname = lname
+        self.phone_num=phone_num
+        self.confirmed = confirmed
     def __repr__(self):
         return str(self.id) + ' - ' + str(self.user)
 
@@ -33,6 +41,15 @@ class Users(db.Model, UserMixin):
         db.session.commit( )
 
         return self 
+    def update(self, fname, lname, newpassword, newemail, newphonenum):
+        # commit change and save the object
+        self.fname = fname
+        self.lname = lname
+        self.password = newpassword
+        self.email = newemail
+        self.phone_num = newphonenum
+        db.session.commit()
+        return self
 
 class Ligands(db.Model):
 

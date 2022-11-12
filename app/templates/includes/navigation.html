@@ -1,46 +1,96 @@
-
-    <header class="header-global">
-        <nav id="navbar-main" aria-label="Primary navigation" class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark">
-            <div class="container position-relative">
-                <a class="navbar-brand me-lg-5" href="./index.html">
-                    <img class="navbar-brand-dark" src="static/assets/img/logo.png" alt="Logo light">
-                    <img class="navbar-brand-light" src="static/assets/img/logo.png" alt="Logo dark">
-                </a>
-                <div class="navbar-collapse collapse me-auto" id="navbar_global">
-                    <div class="navbar-collapse-header">
-                        <div class="row">
-                            <div class="col-6 collapse-brand">
-                                <a href="./index.html">
-                                    <img src="static/assets/img/logo.png" alt="BK logo">
-                                </a>
-                            </div>
-                            <div class="col-6 collapse-close">
-                                <a href="#navbar_global" class="fas fa-times" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" title="close" aria-label="Toggle navigation"></a>
-                            </div>
-                        </div>
-                    </div>
-                    <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
-                        <li class="nav-item">
-                            <a href="index.html" class="nav-link" id="homeNav" aria-expanded="false">
-                                Home
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="system.html" class="nav-link" id="systemNav" aria-expanded="false">
-                                System
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="scoreboard.html" class="nav-link" id="scoreboardNav" aria-expanded="false">
-                                Scoreboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="about.html" class="nav-link" id="aboutNav" aria-expanded="false">
-                                About
-                            </a>
-                        </li>
-                        <!-- <li class="nav-item dropdown">
+<header class="header-global">
+  <nav
+    id="navbar-main"
+    aria-label="Primary navigation"
+    class="navbar navbar-main navbar-expand-lg navbar-theme-primary headroom navbar-dark"
+  >
+    <div class="container position-relative">
+      <a class="navbar-brand me-lg-5" href="./index.html">
+        <img
+          class="navbar-brand-dark"
+          src="static/assets/img/logo.png"
+          alt="Logo light"
+        />
+        <img
+          class="navbar-brand-light"
+          src="static/assets/img/logo.png"
+          alt="Logo dark"
+        />
+      </a>
+      <div class="navbar-collapse collapse me-auto" id="navbar_global">
+        <div class="navbar-collapse-header">
+          <div class="row">
+            <div class="col-6 collapse-brand">
+              <a href="./index.html">
+                <img src="static/assets/img/logo.png" alt="BK logo" />
+              </a>
+            </div>
+            <div class="col-6 collapse-close">
+              <a
+                href="#navbar_global"
+                class="fas fa-times"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbar_global"
+                aria-controls="navbar_global"
+                aria-expanded="false"
+                title="close"
+                aria-label="Toggle navigation"
+              ></a>
+            </div>
+          </div>
+        </div>
+        <ul class="navbar-nav navbar-nav-hover align-items-lg-center">
+          <li class="nav-item">
+            <a
+              href="index.html"
+              class="nav-link"
+              id="homeNav"
+              aria-expanded="false"
+            >
+              Home
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="modify.html"
+              class="nav-link"
+              id="homeNav"
+              aria-expanded="false"
+            >
+              Account
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="system.html"
+              class="nav-link"
+              id="systemNav"
+              aria-expanded="false"
+            >
+              System
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="scoreboard.html"
+              class="nav-link"
+              id="scoreboardNav"
+              aria-expanded="false"
+            >
+              Scoreboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              href="overview.html"
+              class="nav-link"
+              id="aboutNav"
+              aria-expanded="false"
+            >
+              Overview
+            </a>
+          </li>
+          <!-- <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" id="frontPagesDropdown" aria-expanded="false" data-bs-toggle="dropdown">
                                 Pages
                                 <span class="fas fa-angle-down nav-link-arrow ms-1"></span>
@@ -72,7 +122,7 @@
                                 </div>
                             </div>
                         </li> -->
-                        <!--
+          <!--
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" id="supportDropdown" aria-expanded="false">
                                 Support
@@ -94,18 +144,46 @@
                             </div>
                         </li>
                         -->
-                    </ul>
-                </div>
-                <div class="d-flex align-items-center">
-                    <a href="{{ url_for('logout') }}"
-                       class="btn btn-outline-gray-100 d-none d-lg-inline me-md-3"><span class="fas fa-sign-out-alt me-2"></span> Logout</a>
-                    <a href="./contact.html" 
-                       target="_blank" class="btn btn-tertiary"><i class="fas fa-cloud-download-alt me-2"></i>Contact</a>
-                    <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_global" aria-controls="navbar_global" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                </div>
-            </div>
-        </nav>
-    </header>
+          <li class="nav-item">
+            <a
+              href="about.html"
+              class="nav-link"
+              id="aboutNav"
+              aria-expanded="false"
+            >
+              About
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="d-flex align-items-center">
+        <a
+          href="{{ url_for('logout') }}"
+          class="btn btn-outline-gray-100 d-none d-lg-inline me-md-3"
+          ><span class="fas fa-sign-out-alt me-2"></span> Logout</a
+        >
+        <a href="./contact.html" target="_blank" class="btn btn-tertiary"
+          ><i class="fas fa-cloud-download-alt me-2"></i>Contact</a
+        >
+        <!-- <a
+          href="./personal_account.html"
+          target="_blank"
+          class="btn btn-tertiary"
+          ><i class="fas fa-user"></i>User</a
+        > -->
 
+        <button
+          class="navbar-toggler ms-2"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbar_global"
+          aria-controls="navbar_global"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+</header>

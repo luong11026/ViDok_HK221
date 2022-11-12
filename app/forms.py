@@ -13,8 +13,24 @@ class LoginForm(FlaskForm):
 	password    = PasswordField(u'Password'  , validators=[DataRequired()])
 
 class RegisterForm(FlaskForm):
-	fname        = StringField  (u'First Name'      )
-	lname        = StringField  (u'Last Name'      )
+	fname        = StringField  (u'First Name', validators=[DataRequired()])
+	lname        = StringField  (u'Last Name', validators=[DataRequired()])
 	username    = StringField  (u'Username'  , validators=[DataRequired()])
 	password    = PasswordField(u'Password'  , validators=[DataRequired()])
 	email       = StringField  (u'Email'     , validators=[DataRequired(), Email()])
+	phone_number = StringField (u'Phone Number'  , validators=[DataRequired()])
+
+class ModifyInfoForm(FlaskForm):
+	fname        = StringField  (u'First Name', validators=[DataRequired()])
+	lname        = StringField  (u'Last Name', validators=[DataRequired()])
+	password    = PasswordField(u'Password'  , validators=[DataRequired()])
+	new_password = PasswordField(u'Password'  , validators=[DataRequired()])
+	username = StringField(u'Username', validators=[DataRequired()])
+	new_email = StringField(u'Email', validators=[DataRequired(), Email()])
+	new_phonenum = StringField(u'Phone Number', validators=[DataRequired()])
+
+class PasswordRequestForm(FlaskForm):
+	email = StringField(u'Email', validators=[DataRequired(), Email()])
+
+class ConfirmEmail(FlaskForm):
+	confirm_code = StringField(u'Confirm Code', validators=[DataRequired()])

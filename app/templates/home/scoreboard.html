@@ -1,272 +1,366 @@
-{% extends "layouts/base.html" %}
+{% extends "layouts/base.html" %} {% block stylesheets %}
+<!-- ChemDoodle -->
+<style>
+  #sort_button {
+    background-color: white;
+    border: none;
+  }
 
-{% block title %} View ligands | URA Research Group {% endblock %} 
+  input[type="text"] {
+    background-color: white;
+    border-radius: 5px;
+  }
 
-{% block content %}
+  input[type="text"]:focus {
+    border: 3px solid #555;
+  }
+</style>
+{% endblock stylesheets %} {% block title %} View ligands | URA Research Group
+{% endblock %} {% block content %}
 
-    <main>
-        
-        {% include 'includes/preloader.html' %}
+<main>
+  {% include 'includes/preloader.html' %}
 
-        <!-- Hero -->
-        <!-- Hero -->
-        <div class="section-header pb-6 bg-primary text-white">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-8 text-center">
-                        <h1 class="display-3 mb-4">Scoreboard</h1>
-                        <p class="lead mb-5">View top deisgned ligands</p>
-                    </div>
-                </div>
-            </div>
+  <!-- Hero -->
+  <!-- Hero -->
+  <div class="section-header pb-6 bg-primary text-white">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 text-center">
+          <h1 class="display-3 mb-4">Scoreboard</h1>
+          <p class="lead mb-5">View top deisgned ligands</p>
         </div>
-        
-        <!-- End of Hero -->
-        <div class="section section-md">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-12">                        
-                        <div class="mb-5">
-                            <div class="mb-4">
-                                <div class="row justify-content-center">
-                                    <div class="col col-md-6">
-                                        <span class="h5 d-inline">Designed Ligands</span>
-                                    </div>
-                                    <div class="col col-md-6 d-flex justify-content-end align-middle">
-                                        <label for="block_length">Ligands per page</label>
-                                        <div class="px-2">
-                                            <input type="number" class="form-control" id="block_length" min=1 max=100 value=10 required onchange="changeBlockLength()">
-                                        </div>
-                                        <div class="px-2">
-                                            <button class="btn btn-outline-primary" type="button" id="only_me" onclick="setOnlyMeRevert()">
-                                                <span class="me-1">
-                                                    <span class="far fa-user"></span>
-                                                </span> Only me
-                                            </button>
-                                        </div>
-                                     </div>
-                                </div>
-                                
-                            </div>
-                            <div class="table-responsive-sm">
-                                <table class="table table-striped" id="list_ligands">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">No.</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Score</th>
-                                            <th scope="col">User</th>
-                                            <th scope="col">Download</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row justify-content-center">
-                    <div class="col-lg-12">
-                        <nav aria-label="Products page navigation">
-                            <ul class="pagination justify-content-center" id="pagination">
+      </div>
+    </div>
+  </div>
 
-                            </ul>
-                        </nav>
-                    </div>
+  <!-- End of Hero -->
+  <div class="section section-md">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-12">
+          <div class="mb-5">
+            <div class="mb-4">
+              <div class="row justify-content-center">
+                <div class="col col-md-6">
+                  <span class="h5 d-inline">Designed Ligands</span>
+                  <div>
+                    <label for="search_box" style="font-weight: bold"
+                      >Find user:
+                    </label>
+                    <input type="text" id="search_box" />
+                    <button class="btn btn-outline-primary" id="search_btn">
+                      Search
+                    </button>
+                    <button class="btn btn-outline-primary" id="clear_btn">
+                      Clear
+                    </button>
+                  </div>
                 </div>
+                <div
+                  class="col col-md-6 d-flex justify-content-end align-middle"
+                >
+                  <label for="block_length">Ligands per page</label>
+                  <div class="px-2">
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="block_length"
+                      min="1"
+                      max="100"
+                      value="10"
+                      required
+                      onchange="changeBlockLength()"
+                    />
+                  </div>
+                  <div class="px-2">
+                    <button
+                      class="btn btn-outline-primary"
+                      type="button"
+                      id="only_me"
+                      onclick="setOnlyMeRevert()"
+                    >
+                      <span class="me-1">
+                        <span class="far fa-user"></span>
+                      </span>
+                      Only me
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
+            <div class="table-responsive-sm">
+              <table class="table table-striped" id="list_ligands">
+                <thead>
+                  <tr>
+                    <th scope="col">No.</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">
+                      <span>Score.</span>
+                      <button id="sort_button" onclick="sortScore()">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          fill="currentColor"
+                          class="bi bi-sort-numeric-down-alt"
+                          viewBox="0 0 16 16"
+                        >
+                          <path
+                            fill-rule="evenodd"
+                            d="M11.36 7.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.836 1.973-1.836 1.09 0 2.063.637 2.063 2.688 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98z"
+                          />
+                          <path
+                            d="M12.438 8.668V14H11.39V9.684h-.051l-1.211.859v-.969l1.262-.906h1.046zM4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293V2.5z"
+                          />
+                        </svg>
+                      </button>
+                    </th>
+                    <th scope="col">User</th>
+                    <th scope="col">Download</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg-12">
+          <nav aria-label="Products page navigation">
+            <ul class="pagination justify-content-center" id="pagination"></ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
 
-    </main>
-
-    {% include 'includes/footer.html' %}
-
-{% endblock content %}
+{% include 'includes/footer.html' %} {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 <script>
-    var block_length = 10;
-    var page_number = 1;
-    var only_me = false;
-    let max_pagination = 5;
+  var block_length = 10;
+  var page_number = 1;
+  var only_me = false;
+  var asc_score = false;
+  var user_name = "";
+  let max_pagination = 5;
 
-    window.onload = (event) => {
-        data = loadData();
+  const searchBox = document.querySelector("#search_box");
+  const searchButton = document.querySelector("#search_btn");
+  const clearButton = document.querySelector("#clear_btn");
+
+  const sortButton = document.querySelector("#sort_button");
+
+  searchButton.addEventListener("click", function () {
+    user_name = searchBox.value;
+    console.log("dakfj");
+    loadData();
+  });
+
+  clearButton.addEventListener("click", function () {
+    user_name = "";
+    searchBox.value = "";
+    loadData();
+  });
+
+  window.onload = (event) => {
+    data = loadData();
+  };
+
+  function sortScore() {
+    asc_score = !asc_score;
+    if (asc_score)
+      sortButton.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-numeric-down" viewBox="0 0 16 16">  <path d="M12.438 1.668V7H11.39V2.684h-.051l-1.211.859v-.969l1.262-.906h1.046z"/>  <path fill-rule="evenodd" d="M11.36 14.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.835 1.973-1.835 1.09 0 2.063.636 2.063 2.687 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98z"/><path d="M4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293V2.5z"/></svg>';
+    else
+      sortButton.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-sort-numeric-down-alt" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M11.36 7.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.836 1.973-1.836 1.09 0 2.063.637 2.063 2.688 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98z"/><path d="M12.438 8.668V14H11.39V9.684h-.051l-1.211.859v-.969l1.262-.906h1.046zM4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293V2.5z"/></svg>';
+    page_number = 1;
+    loadData();
+  }
+
+  function loadData() {
+    $.ajax({
+      url: "view",
+      type: "POST",
+      dataType: "JSON",
+      data: JSON.stringify({
+        block_length: block_length,
+        page_number: page_number,
+        only_me: only_me,
+        asc_score: asc_score,
+        user_name: user_name,
+      }),
+    })
+      .done(function (results) {
+        createDataTable(results["list_ligands"]);
+        createPagination(results["total"]);
+      })
+      .fail(function () {
+        alert("There are some error! Please refresh page!");
+      });
+  }
+
+  function setOnlyMeRevert() {
+    // Change only_me
+    only_me = !only_me;
+    page_number = 1;
+    only_me_dom = document.getElementById("only_me");
+    if (only_me == true) {
+      only_me_dom.className = "btn btn-primary";
+      searchBox.value = "";
+      user_name = "";
+    } else {
+      only_me_dom.className = "btn btn-outline-primary";
+    }
+    loadData();
+  }
+
+  function changeBlockLength() {
+    // Change block_length
+    input_block_length = document.getElementById("block_length");
+    block_length = parseInt(input_block_length.value);
+    loadData();
+  }
+
+  function loadPage(pn) {
+    page_number = pn;
+    loadData();
+  }
+
+  function createDataTable(list_ligands) {
+    var sTable = document.getElementById("list_ligands");
+    var tableHeaderRowCount = 1;
+    var rowCount = sTable.rows.length;
+    for (var i = tableHeaderRowCount; i < rowCount; i++) {
+      sTable.deleteRow(tableHeaderRowCount);
+    }
+
+    list_ligands.forEach((ligand, idx) => {
+      newRow = sTable.insertRow(-1);
+      var c1 = document.createElement("td");
+      var c2 = document.createElement("td");
+      var c3 = document.createElement("td");
+      var c4 = document.createElement("td");
+      var c5 = document.createElement("td");
+      c1.innerHTML = ligand["no."];
+      c2.innerHTML = ligand["name"];
+      c3.innerHTML = ligand["score"];
+      c4.innerHTML = ligand["user"];
+      download_button = document.createElement("a");
+      download_button.className = "btn btn-outline-tertiary";
+      download_button.innerHTML = "Download";
+      download_button.href = ligand["download"];
+      c5.appendChild(download_button);
+      newRow.appendChild(c1);
+      newRow.appendChild(c2);
+      newRow.appendChild(c3);
+      newRow.appendChild(c4);
+      newRow.appendChild(c5);
+    });
+
+    // var header = sTable.createTHead().insertRow(0);;
+    // var c1 = document.createElement('th');
+    // var c2 = document.createElement('th');
+    // var c3 = document.createElement('th');
+    // var c4 = document.createElement('th');
+    // var c5 = document.createElement('th');
+    // c1.innerHTML = "No.";
+    // c2.innerHTML = "Name";
+    // c3.innerHTML = "Score";
+    // c4.innerHTML = "User";
+    // c5.innerHTML = "Download";
+    // header.appendChild(c1);
+    // header.appendChild(c2);
+    // header.appendChild(c3);
+    // header.appendChild(c4);
+    // header.appendChild(c5);
+  }
+
+  function range(start, end) {
+    if (start === end) return [start];
+    return [start, ...range(start + 1, end)];
+  }
+
+  function createPagination(total) {
+    paging = document.getElementById("pagination");
+    paging.innerHTML = "";
+    max_page = Math.ceil(total / block_length);
+
+    first = document.createElement("li");
+    first.className = "page-item";
+    first_a = document.createElement("a");
+    first_a.className = "page-link";
+    first_a.innerHTML = "<<";
+    first_a.onclick = function (event) {
+      loadPage(1);
     };
+    first.appendChild(first_a);
+    paging.appendChild(first);
 
-    function loadData() {
-        $.ajax({
-                url: 'view',
-                type: 'POST',
-                dataType: 'JSON',
-                data: JSON.stringify({
-                    "block_length": block_length,
-                    "page_number": page_number,
-                    "only_me": only_me
-                })
-            }).done(function(results) {
-                createDataTable(results["list_ligands"]);
-                createPagination(results["total"]);
-            }).fail(function() {
-                alert("There are some error! Please refresh page!");
-            });
+    prev = document.createElement("li");
+    prev.className = "page-item";
+    prev_a = document.createElement("a");
+    prev_a.className = "page-link";
+    prev_a.innerHTML = "<";
+    if (page_number == 1) prev.className += " disabled";
+    else
+      prev_a.onclick = function (event) {
+        loadPage(page_number - 1);
+      };
+    prev.appendChild(prev_a);
+    paging.appendChild(prev);
+
+    list_paging = [];
+    if (page_number - 2 < 1) {
+      list_paging = range(1, Math.min(max_pagination, max_page));
+    } else if (page_number + 2 > max_page) {
+      list_paging = range(Math.max(1, max_page - 4), max_page);
+    } else {
+      list_paging = range(page_number - 2, page_number + 2);
     }
 
-    function setOnlyMeRevert() {
-        // Change only_me
-        only_me = !only_me;
-        page_number = 1;
-        only_me_dom = document.getElementById("only_me");
-        if (only_me == true) {
-            only_me_dom.className = "btn btn-primary";
-        } else {
-            only_me_dom.className = "btn btn-outline-primary";
-        }
-        loadData();
-    }
+    list_paging.forEach((element) => {
+      apage = document.createElement("li");
+      apage.className = "page-item";
+      apage_a = document.createElement("a");
+      apage_a.className = "page-link";
+      apage_a.innerHTML = element;
+      if (element == page_number) apage.className += " active";
+      apage_a.onclick = function (event) {
+        loadPage(element);
+      };
+      apage.appendChild(apage_a);
+      paging.appendChild(apage);
+    });
 
-    function changeBlockLength() {
-        // Change block_length
-        input_block_length = document.getElementById("block_length");
-        block_length = parseInt(input_block_length.value);
-        loadData();
-    }
+    next = document.createElement("li");
+    next.className = "page-item";
+    next_a = document.createElement("a");
+    next_a.className = "page-link";
+    next_a.innerHTML = ">";
+    if (page_number == max_page) next.className += " disabled";
+    else
+      next_a.onclick = function (event) {
+        loadPage(page_number + 1);
+      };
+    next.appendChild(next_a);
+    paging.appendChild(next);
 
-    function loadPage(pn) {
-        page_number = pn;
-        loadData();
-    }
-
-    function createDataTable(list_ligands) {
-        var sTable = document.getElementById('list_ligands');
-        sTable.innerHTML = "";
-
-        list_ligands.forEach((ligand, idx) => {
-            newRow = sTable.insertRow(-1);
-            var c1 = document.createElement('td');
-            var c2 = document.createElement('td');
-            var c3 = document.createElement('td');
-            var c4 = document.createElement('td');
-            var c5 = document.createElement('td');
-            c1.innerHTML = ligand["no."];
-            c2.innerHTML = ligand["name"];
-            c3.innerHTML = ligand["score"];
-            c4.innerHTML = ligand["user"];
-            download_button = document.createElement('a');
-            download_button.className = "btn btn-outline-tertiary";
-            download_button.innerHTML = "Download";
-            download_button.href = ligand["download"];
-            c5.appendChild(download_button);
-            newRow.appendChild(c1);
-            newRow.appendChild(c2);
-            newRow.appendChild(c3);
-            newRow.appendChild(c4);
-            newRow.appendChild(c5);
-        });
-
-        var header = sTable.createTHead().insertRow(0);;
-        var c1 = document.createElement('th');
-        var c2 = document.createElement('th');
-        var c3 = document.createElement('th');
-        var c4 = document.createElement('th');
-        var c5 = document.createElement('th');
-        c1.innerHTML = "No.";
-        c2.innerHTML = "Name";
-        c3.innerHTML = "Score";
-        c4.innerHTML = "User";
-        c5.innerHTML = "Download";
-        header.appendChild(c1);
-        header.appendChild(c2);
-        header.appendChild(c3);
-        header.appendChild(c4);
-        header.appendChild(c5);
-    }
-
-    function range(start, end) {
-        if(start === end) return [start];
-        return [start, ...range(start + 1, end)];
-    }
-
-    function createPagination(total) {
-        paging = document.getElementById("pagination");
-        paging.innerHTML = ""
-        max_page = Math.ceil(total / block_length);
-
-        first = document.createElement('li');
-        first.className = "page-item";
-        first_a = document.createElement('a');
-        first_a.className = "page-link";
-        first_a.innerHTML = "<<";
-        first_a.onclick = function(event) {
-            loadPage(1);
-        };
-        first.appendChild(first_a);
-        paging.appendChild(first);
-
-        prev = document.createElement('li');
-        prev.className = "page-item";
-        prev_a = document.createElement('a');
-        prev_a.className = "page-link";
-        prev_a.innerHTML = "<";
-        if (page_number == 1) prev.className += " disabled";
-        else
-        prev_a.onclick = function(event) {
-            loadPage(page_number-1);
-        };
-        prev.appendChild(prev_a);
-        paging.appendChild(prev);
-
-        list_paging = []
-        if (page_number - 2 < 1) {
-            list_paging = range(1, Math.min(max_pagination, max_page));
-        } else if (page_number + 2 > max_page) {
-            list_paging = range(Math.max(1, max_page-4), max_page);
-        } else {
-            list_paging = range(page_number-2, page_number + 2);
-        }
-
-        list_paging.forEach(element => {
-            apage = document.createElement('li');
-            apage.className = "page-item";
-            apage_a = document.createElement('a');
-            apage_a.className = "page-link";
-            apage_a.innerHTML = element;
-            if (element == page_number) apage.className += " active";
-            apage_a.onclick = function(event) {
-                loadPage(element);
-            };
-            apage.appendChild(apage_a);
-            paging.appendChild(apage);
-        });
-
-        next = document.createElement('li');
-        next.className = "page-item";
-        next_a = document.createElement('a');
-        next_a.className = "page-link";
-        next_a.innerHTML = ">";
-        if (page_number == max_page) next.className += " disabled";
-        else
-        next_a.onclick = function(event) {
-            loadPage(page_number+1);
-        };
-        next.appendChild(next_a);
-        paging.appendChild(next);
-
-        last = document.createElement('li');
-        last.className = "page-item";
-        last_a = document.createElement('a');
-        last_a.className = "page-link";
-        last_a.innerHTML = ">>";
-        last_a.onclick = function(event) {
-            loadPage(max_page);
-        };
-        last.appendChild(last_a);
-        paging.appendChild(last);
-        
-    }
-
+    last = document.createElement("li");
+    last.className = "page-item";
+    last_a = document.createElement("a");
+    last_a.className = "page-link";
+    last_a.innerHTML = ">>";
+    last_a.onclick = function (event) {
+      loadPage(max_page);
+    };
+    last.appendChild(last_a);
+    paging.appendChild(last);
+  }
 </script>
 {% endblock javascripts %}
