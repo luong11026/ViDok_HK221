@@ -20,14 +20,13 @@ class RegisterForm(FlaskForm):
 	email       = StringField  (u'Email'     , validators=[DataRequired(), Email()])
 	phone_number = StringField (u'Phone Number'  , validators=[DataRequired()])
 
-class ModifyInfoForm(FlaskForm):
-	fname        = StringField  (u'First Name', validators=[DataRequired()])
-	lname        = StringField  (u'Last Name', validators=[DataRequired()])
-	password    = PasswordField(u'Password'  , validators=[DataRequired()])
-	new_password = PasswordField(u'Password'  , validators=[DataRequired()])
-	username = StringField(u'Username', validators=[DataRequired()])
-	new_email = StringField(u'Email', validators=[DataRequired(), Email()])
-	new_phonenum = StringField(u'Phone Number', validators=[DataRequired()])
+class AccountInfor(FlaskForm):
+	new_fname        = StringField  (u'First Name')
+	new_lname        = StringField  (u'Last Name')
+	new_email = StringField(u'Email', validators=[Email()])
+	new_phone_num = StringField(u'Phone Number')
+	new_password = PasswordField(u'Password')
+	password    = PasswordField(u'Password')
 
 class PasswordRequestForm(FlaskForm):
 	email = StringField(u'Email', validators=[DataRequired(), Email()])

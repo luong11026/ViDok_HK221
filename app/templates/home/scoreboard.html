@@ -127,11 +127,17 @@
         </div>
       </div>
       <div class="row justify-content-center">
-        <div class="col-lg-12">
+        <div class="col-lg-4">
           <nav aria-label="Products page navigation">
             <ul class="pagination justify-content-center" id="pagination"></ul>
           </nav>
         </div>
+        <div class="col-lg-4">
+          Number of selected: <span id="selected"></span>
+        </div>
+        <a class="col-lg-4" id="download_selected" href="/download_selected">
+          Download selected ligands
+        </a>
       </div>
     </div>
   </div>
@@ -152,12 +158,11 @@
   const searchBox = document.querySelector("#search_box");
   const searchButton = document.querySelector("#search_btn");
   const clearButton = document.querySelector("#clear_btn");
-
   const sortButton = document.querySelector("#sort_button");
+  const downloadSelectedButton = document.querySelector("#download_selected");
 
   searchButton.addEventListener("click", function () {
     user_name = searchBox.value;
-    console.log("dakfj");
     loadData();
   });
 
@@ -165,6 +170,36 @@
     user_name = "";
     searchBox.value = "";
     loadData();
+  });
+
+  downloadSelectedButton.addEventListener("click", function () {
+    let checkedBoxes = document.querySelectorAll(
+      "input[name=check_box]:checked"
+    );
+
+    if (checkedBoxes.length == 0 || checkedBoxes == NULL) {
+      alert("Please choose a designed ligand to download! ");
+      return;
+    }
+
+    let checkBoxesID = [];
+    for (let i = 0; i < checkedBoxes.length; i++) {
+      checkBoxesID.push(checkedBoxes[i].id);
+    }
+    console.log(checkBoxesID);
+
+    $.ajax({
+      url: "download_selected",
+      type: "POST",
+      dataType: "JSON",
+      data: JSON.stringify(checkBoxesID),
+    })
+      .done(function (results) {
+        console.log("Success");
+      })
+      .fail(function () {
+        alert("There are some error! Please refresh page!");
+      });
   });
 
   window.onload = (event) => {
@@ -247,6 +282,7 @@
       var c3 = document.createElement("td");
       var c4 = document.createElement("td");
       var c5 = document.createElement("td");
+      var c6 = document.createElement("td");
       c1.innerHTML = ligand["no."];
       c2.innerHTML = ligand["name"];
       c3.innerHTML = ligand["score"];
@@ -256,11 +292,17 @@
       download_button.innerHTML = "Download";
       download_button.href = ligand["download"];
       c5.appendChild(download_button);
+      checkbox_button = document.createElement("input");
+      checkbox_button.type = "checkbox";
+      checkbox_button.name = "check_box";
+      checkbox_button.id = `${ligand["download"]}`;
+      c6.appendChild(checkbox_button);
       newRow.appendChild(c1);
       newRow.appendChild(c2);
       newRow.appendChild(c3);
       newRow.appendChild(c4);
       newRow.appendChild(c5);
+      newRow.appendChild(c6);
     });
 
     // var header = sTable.createTHead().insertRow(0);;

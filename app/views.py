@@ -16,11 +16,15 @@ from flask_login         import login_user, logout_user, current_user, login_req
 from werkzeug.exceptions import HTTPException, NotFound, abort
 from jinja2              import TemplateNotFound
 from sqlalchemy import func
+from flask import send_file
+from glob import glob
+from io import BytesIO
+from zipfile import ZipFile
 
 # App modules
 from app        import app, lm, db, bc
 from app.models import Users, Ligands
-from app.forms  import ConfirmEmail, LoginForm, ModifyInfoForm, PasswordRequestForm, RegisterForm
+from app.forms  import ConfirmEmail, LoginForm, AccountInfor, PasswordRequestForm, RegisterForm
 from app.chem_utils import DockingAgent, save_compound
 from app.dss_system import DSSSystem
 from app.util   import create_user_folders, response
@@ -32,6 +36,10 @@ session ={}
 session['confirmed'] = False
 session['confirm_code_hash'] = '123'
 session['email'] = 'empty'
+
+# Support function
+def has_numbers(inputString):
+    return any(char.isdigit() for char in inputString)
 
 # pro   de login manager with load_user callback
 @lm.user_loader
@@ -53,7 +61,6 @@ def register():
     msg     = None
     success = False
     if request.method == 'GET': 
-
         return render_template( 'accounts/register.html', form=form, msg=msg)
 
     # check if both http method is POST and form is valid on submit
@@ -76,13 +83,15 @@ def register():
             msg = 'Error: User exists!'
         elif phone_num == '':
             msg = 'Error: Input phone number again!'
+        elif has_numbers(fname) or has_numbers(lname):
+            msg = 'Error: name contains number!'
         else:
             confirm_code = create_confirm_code()
             sendmail_code(email, confirm_code)
             confirm_code_hash = bc.generate_password_hash(confirm_code)
             session['confirm_code_hash'] = confirm_code_hash
             pw_hash = bc.generate_password_hash(password)
-            user = Users(username, email, pw_hash, fname, lname, phone_num, confirmed=False)
+            user = Users(username, email, pw_hash, fname, lname, phone_num, confirmed=True)
             user.save()
             create_user_folders(user.id)
             msg     = 'User created successfully'
@@ -117,49 +126,6 @@ def confirm_email():
         msg = 'Your code is incorrect'
     return render_template( 'accounts/confirmemail.html', form=form, msg = msg, success = success)
 
-@app.route('/modify.html', methods=['GET', 'POST'])
-def modify():
-    # declare the Modification Form
-    form = ModifyInfoForm(request.form)
-    msg = None
-    success = False
-    if request.method == 'GET':
-        return render_template('home/modify.html', form=form, msg=msg )
-
-    if form.validate_on_submit():
-        # assign form data to variables
-        fname = request.form.get('fname', '', type=str)
-        lname = request.form.get('lname', '', type=str)
-        username = request.form.get('username', '', type=str)
-        password = request.form.get('password', '', type=str)
-        new_password = request.form.get('new_password', '', type=str)
-        new_email = request.form.get('new_email', '', type=str)
-        new_phonenum = request.form.get('new_phonenum', '', type=int)
-        # filter User out of database through username
-        user = Users.query.filter_by(user=username).first()
-        # filter Email
-        user_by_email = Users.query.filter_by(email=new_email).first()
-        if user:
-            if user_by_email:
-                msg = 'Error: Email exists!'
-                return render_template('home/modify.html', form=form, msg=msg, success=success)
-            if new_phonenum == '':
-                msg = 'Error: Input phone number again!'
-            if bc.check_password_hash(user.password, password):
-                pw_hash = bc.generate_password_hash(new_password)
-                user.update(fname, lname, pw_hash, new_email, new_phonenum)
-                msg = 'Modify user info successfully.'
-                success=True
-                # logout and login again
-                logout()
-                return render_template('home/modify.html', form=form, msg=msg, success=success)
-            else:
-                msg = "Wrong password. Please try again."
-        else:
-            msg = "Unknown user"
-    # return redirect(url_for('modify'))
-    return render_template('home/modify.html', form=form, msg=msg, success=success)
-
 @app.route('/passwordrequest.html', methods=['GET', 'POST'])
 def request_password():
     # declare the form
@@ -188,6 +154,44 @@ def request_password():
         else:
             msg = f"Email: {receiver_email} doesn't exist"
     return render_template('accounts/passwordrequest.html', form=form, msg=msg, success=success)
+
+@app.route('/account', methods=['GET', 'POST'])
+def account_infor():
+    if not current_user.is_authenticated:
+        return redirect(url_for('index'))
+    user = Users.query.filter_by(user = current_user.user).first()
+    form = AccountInfor(request.form)
+
+    if request.method == 'GET':
+        return render_template('accounts/user_infor.html', user = user, form=form)
+    
+    success = False
+    msg = "You should input properly"
+    
+    new_fname = request.form.get('new_fname','', type=str)
+    new_lname = request.form.get('new_lname', '', type=str)
+    new_phone_num = request.form.get('new_phone_num','',type=int)
+    password = request.form.get('password','',type=str)
+    new_pw = request.form.get('new_password','',type=str)
+    if new_fname != "" and not has_numbers(new_fname):
+        user.fname = new_fname
+    if new_lname != "" and not has_numbers(new_lname):
+        user.lname = new_lname
+    if new_phone_num != "":
+        user.phone_num = new_phone_num
+    if password != "" and new_pw != "":
+        if bc.check_password_hash(user.password, password):
+            pw_hash = bc.generate_password_hash(new_pw)               
+            user.password = pw_hash
+            msg = "Modify succesfully"
+            success = True
+            # logout and login again
+            logout()
+            return render_template('accounts/user_infor.html', form=form, msg=msg, success=success)
+        else:
+            msg = "Wrong password, please try again!"
+    db.session.commit()
+    return render_template('accounts/user_infor.html', user = user, form=form, msg = msg)
 
 # Authenticate user
 @app.route('/login.html', methods=['GET', 'POST'])
@@ -368,3 +372,38 @@ def download(user, molecule, file_name):
         dir += "/"
     
     return send_from_directory(directory = dir, path = file_name, as_attachment = False)
+
+@app.route("/download_all_from/<user>", methods =["GET"])
+def download_all_from(user):
+    user = Users.query.filter_by(user=user).first()
+    target = os.getcwd()
+
+    stream = BytesIO()
+    with ZipFile(stream, 'w') as zf:
+        for file in glob(os.path.join(Config.CHEM_DIR, "dockings", str(user.id), '*.mol')):
+            zf.write(file, os.path.basename(file))
+    stream.seek(0)
+
+    return send_file(
+        stream,
+        as_attachment=True,
+        download_name=str(user.user)+'_ligands.zip'
+    )
+
+
+@app.route('/download_selected', methods=['GET','POST'])
+def download_selected():
+    check_boxes = request.get_json(force=True)
+
+    stream = BytesIO
+    with ZipFile(stream, 'w') as zf:
+        for check_box in check_boxes:
+            check_box.split('/')
+            user_name = check_box[1]
+            file_name = check_box[3]
+            user = Users.query.filter_by(user= user_name).first()
+            file = os.path.join(Config.CHEM_DIR, "dockings", str(user.id), file_name)
+            zf.write(file, os.path.basename(file))
+    stream.seek(0)
+    
+    return send_file(stream, as_attachment=True, download_name="selected_ligands.zip")

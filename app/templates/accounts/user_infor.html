@@ -1,0 +1,221 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %} {% block content %}
+
+<main>
+  {% include 'includes/preloader.html' %}
+
+  <!-- Section -->
+  <section
+    class="min-vh-100 d-flex align-items-center section-image overlay-soft-dark"
+    data-background="static/assets/img/pages/form-image.jpg"
+  >
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 d-flex align-items-center justify-content-center">
+          <div
+            class="signin-inner my-4 my-lg-0 bg-white shadow-soft border rounded border-gray-300 p-4 p-lg-5 w-100 fmxw-500"
+          >
+            <div class="text-center text-md-center mb-3 mt-md-0">
+              <h1 class="mb-0 h3">
+                <a href="index.html">ViDok-BK</a> - Account
+              </h1>
+              <br />
+              <span class="font-weight-normal">
+                {% if msg %} {{ msg | safe }} {% else %} User Information {%
+                endif %}
+              </span>
+            </div>
+
+            {% if not success %}
+            <form method="post" action="" class="mt-4">
+              {{ form.hidden_tag() }}
+
+              <!-- Form -->
+              <div class="form-group">
+                <div class="form-group mb-3">
+                  <label for="username">Username</label>
+                  <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1"
+                      ><span class="fas fa-user"></span
+                    ></span>
+                    <div class="form-control">{{ user.user}}</div>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="email">Email</label>
+                  <div class="input-group">
+                    <span class="input-group-text" id="basic-addon2"
+                      ><span class="fas fa-unlock-alt"></span
+                    ></span>
+                    <div class="form-control">{{ user.email}}</div>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <label for="fname">First name</label>
+                  <div class="input-group">
+                    <span class="input-group-text" id="basic-addon3"
+                      ><span class="fas fa-forward"></span
+                    ></span>
+                    <div class="form-control">{{ user.fname}}</div>
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#change1"
+                      aria-expanded="true"
+                    >
+                      Change
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <div
+                    class="collapse-vertical collapse form-floating"
+                    id="change1"
+                  >
+                    {{ form.new_fname(class="form-control input-group",
+                    placeholder ='First name', type="text") }}
+                    <label>New first name</label>
+                    <button
+                      type="submit"
+                      class="btn btn-outline-secondary"
+                      style="margin-top: 16px; padding: 10px 20px"
+                    >
+                      Modify
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="lname">Last name</label>
+                  <div class="input-group">
+                    <span class="input-group-text" id="basic-addon4"
+                      ><span class="fas fa-backward"></span
+                    ></span>
+                    <div class="form-control">{{ user.lname}}</div>
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#change2"
+                      aria-expanded="true"
+                    >
+                      Change
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <div
+                    class="collapse-vertical collapse form-floating"
+                    id="change2"
+                  >
+                    {{ form.new_lname(class="form-control input-group",
+                    placeholder ='Last name', type="text") }}
+                    <label>New last name</label>
+                    <button
+                      type="submit"
+                      class="btn btn-outline-secondary"
+                      style="margin-top: 16px; padding: 10px 20px"
+                    >
+                      Modify
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <label for="phone_num">Phone number</label>
+                  <div class="input-group">
+                    <span class="input-group-text" id="basic-addon5"
+                      ><span class="fas fa-phone"></span
+                    ></span>
+                    <div class="form-control">{{ user.phone_num }}</div>
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      data-bs-toggle="collapse"
+                      data-bs-target="#change3"
+                      aria-expanded="true"
+                    >
+                      Change
+                    </button>
+                  </div>
+                </div>
+                <div class="form-group mb-3">
+                  <div
+                    class="collapse-vertical collapse form-floating"
+                    id="change3"
+                  >
+                    {{ form.new_phone_num(class="form-control input-group",
+                    placeholder ='New phone number', type="number") }}
+                    <label>New phone number</label>
+                    <button
+                      type="submit"
+                      class="btn btn-outline-secondary"
+                      style="margin-top: 16px; padding: 10px 20px"
+                    >
+                      Modify
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  data-bs-toggle="collapse"
+                  data-bs-target="#change4"
+                  aria-expanded="true"
+                  style="margin-bottom: 16px"
+                >
+                  Change password
+                </div>
+                <div class="form-group mb-3">
+                  <div
+                    class="collapse-vertical collapse form-floating"
+                    id="change4"
+                  >
+                    {{ form.password(class="form-control input-group",
+                    placeholder ='Password', type="password") }}
+                    <label>Current password</label>
+                  </div>
+                </div>
+
+                <div class="form-group mb-3">
+                  <div
+                    class="collapse-vertical collapse form-floating"
+                    id="change4"
+                  >
+                    {{ form.new_password(class="form-control input-group",
+                    placeholder ='New password', type="password") }}
+                    <label>New password</label>
+                    <button
+                      type="submit"
+                      class="btn btn-outline-secondary"
+                      style="margin-top: 16px; padding: 10px 20px"
+                    >
+                      Modify
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <!-- End of Form -->
+            </form>
+
+            {% else %}
+
+            <p class="mt-4 text-sm text-center">
+              <a href="{{ url_for('login') }}" class="btn btn-primary">Login</a>
+            </p>
+
+            {% endif %}
+            <br />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
