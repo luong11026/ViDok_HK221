@@ -90,68 +90,15 @@
 {% block javascripts %}
 <script>
   // Chart configuration
-  const ctx = document.getElementById("myChart").getContext("2d");
-
-  let delayed;
-
-  const labels = [1, 2, 3, 4, 5, 6, 7];
-  const data = {
-    labels: labels,
-    datasets: [
-      {
-        label: "Total submission per day",
-        data: [2, 1, 4, 5, 11, 3, 9],
-        fill: true,
-        backgroundColor: "#DFF8FF",
-        borderColor: "#009FCC",
-        tension: 0.1,
-      },
-    ],
-  };
-
-  const config = {
-    type: "line",
-    data: data,
-    options: {
-      responsive: true,
-      animation: {
-        onComplete: () => {
-          delayed = true;
-        },
-        delay: (context) => {
-          let delay = 0;
-          if (
-            context.type === "data" &&
-            context.mode === "default" &&
-            !delayed
-          ) {
-            delay = context.dataIndex * 600 + context.datasetIndex * 1000;
-          }
-          return delay;
-        },
-      },
-      maintainAspectRatio: false,
-      plugins: {
-        title: {
-          display: true,
-          text: "Total submissions per day in the last 7 days",
-        },
-        legend: {
-          display: false,
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
-  };
-
-  const myChart = new Chart(ctx, config);
 
   // Other configurations
-  let total_submisison = 0, total_user, max_score, min_score, avg_score;
+
+  let total_submisison = 0,
+    total_user,
+    max_score,
+    min_score,
+    avg_score,
+    total_list;
 
   window.onload = (event) => {
     loadData();
@@ -160,35 +107,135 @@
   function loadData() {
     $.ajax({
       url: "overview",
-      type: "POST",
+      type: "GET",
       dataType: "JSON",
     })
       .done(function (results) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const previousSevenDate = new Date();
+        previousSevenDate.setDate(today.getDate() - 7);
+        previousSevenDate.setHours(0, 0, 0, 0);
+        console.log(previousSevenDate);
+
         total_submission = results["total_sub"];
         total_user = results["total_us"];
         min_score = results["min_score"];
         max_score = results["max_score"];
         avg_score = results["avg_score"];
+        total_list = results["list_ligands"];
 
         console.log(total_submission);
         console.log(total_user);
-        console.log(min_score); 
+        console.log(min_score);
         console.log(max_score);
         console.log(avg_score);
+        console.log(total_list);
 
         document.querySelector("#submission").innerHTML = results["total_sub"];
         document.querySelector("#user").innerHTML = results["total_us"];
-        document.querySelector("#min_score").innerHTML = results["min_score"].toFixed(3);
-        document.querySelector("#max_score").innerHTML = results["max_score"].toFixed(3);
-        document.querySelector("#avg_score").innerHTML = results["avg_score"].toFixed(3);
+        document.querySelector("#min_score").innerHTML =
+          results["min_score"].toFixed(3);
+        document.querySelector("#max_score").innerHTML =
+          results["max_score"].toFixed(3);
+        document.querySelector("#avg_score").innerHTML =
+          results["avg_score"].toFixed(3);
+
+        let new_list = total_list.filter((ligand) => {
+          let newLigandTime = new Date(ligand.time);
+          ligand.time = newLigandTime;
+          return ligand.time > previousSevenDate;
+        });
+
+        var dateArr = [];
+        for (let i = 1; i <= 7; i++) {
+          dt = new Date();
+          dt.setDate(previousSevenDate.getDate() + i);
+          console.log(dt.getMonth());
+          let currDate = `${dt.getDate()}-${
+            dt.getMonth() + 1
+          }-${dt.getFullYear()}`;
+          dateArr.push(currDate);
+        }
+        console.log({ dateArr });
+
+        dayArr = [0, 0, 0, 0, 0, 0, 0];
+        for (const dayObj of new_list) {
+          console.log(dayObj);
+          const i = Math.floor(
+            Math.abs(dayObj.time - previousSevenDate) / (1000 * 60 * 60 * 24)
+          );
+          console.log(i);
+          dayArr[i - 1]++;
+        }
+        console.log(dayArr);
+
+        console.log(new_list);
+
+        const ctx = document.getElementById("myChart").getContext("2d");
+
+        let delayed;
+        const labels = dateArr;
+        const data = {
+          labels: labels,
+          datasets: [
+            {
+              label: "Total submission per day",
+              data: dayArr,
+              fill: true,
+              backgroundColor: "#DFF8FF",
+              borderColor: "#009FCC",
+              tension: 0.1,
+            },
+          ],
+        };
+
+        const config = {
+          type: "line",
+          data: data,
+          options: {
+            responsive: true,
+            animation: {
+              onComplete: () => {
+                delayed = true;
+              },
+              delay: (context) => {
+                let delay = 0;
+                if (
+                  context.type === "data" &&
+                  context.mode === "default" &&
+                  !delayed
+                ) {
+                  delay = context.dataIndex * 600 + context.datasetIndex * 1000;
+                }
+                return delay;
+              },
+            },
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: true,
+                text: "Total submissions per day in the last 7 days",
+              },
+              legend: {
+                display: false,
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
+        };
+
+        const myChart = new Chart(ctx, config);
       })
       .fail(function () {
         alert("There are some error! Please refresh page!");
       });
   }
 
-  function change() {
-
-  }
+  function change() {}
 </script>
 {% endblock javascripts %}

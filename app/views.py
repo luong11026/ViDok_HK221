@@ -4,6 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 # Python modules
+import sys
 import os, logging 
 import json
 from datetime import datetime
@@ -36,10 +37,15 @@ session ={}
 session['confirmed'] = False
 session['confirm_code_hash'] = '123'
 session['email'] = 'empty'
+session['selected'] = []
+
 
 # Support function
 def has_numbers(inputString):
     return any(char.isdigit() for char in inputString)
+
+check_boxes = []
+
 
 # pro   de login manager with load_user callback
 @lm.user_loader
@@ -336,11 +342,18 @@ def view_ligands():
 
     return response({"list_ligands": results, "total": total})
 
-@app.route('/overview', methods=['POST'])
+@app.route('/overview', methods=['GET'])
 def get_overview():
     list_ligands = Ligands.query.order_by(Ligands.score.asc())  
     users = Users.query.order_by(Users.id.asc())
-    list_ligands_score = Ligands.query.with_entities(Ligands.score)
+
+    results = []
+    for ligand in list_ligands:
+        new_ligand = {
+            "name": ligand.user,
+            "time": ligand.time
+        }
+        results.append(new_ligand)
 
 
     total_submission = list_ligands.count()
@@ -349,7 +362,7 @@ def get_overview():
     max_value = db.session.query(func.max(Ligands.score)).scalar()
     avg_value = db.session.query(func.avg(Ligands.score)).scalar()
 
-    return response({"total_sub": total_submission, "total_us": total_user, "min_score": min_value, "max_score":max_value, "avg_score": avg_value})
+    return response({"list_ligands": results,"total_sub": total_submission, "total_us": total_user, "min_score": min_value, "max_score":max_value, "avg_score": avg_value})
 
 # Return sitemap
 @app.route('/sitemap.xml')
@@ -370,7 +383,8 @@ def download(user, molecule, file_name):
         dir += "/" + os.path.join(Config.CHEM_DIR, "dockings", str(user.id))
     else:
         dir += "/"
-    
+    print(dir)
+
     return send_from_directory(directory = dir, path = file_name, as_attachment = False)
 
 @app.route("/download_all_from/<user>", methods =["GET"])
@@ -391,19 +405,24 @@ def download_all_from(user):
     )
 
 
-@app.route('/download_selected', methods=['GET','POST'])
+@app.route('/download_selected', methods=["POST"])
 def download_selected():
-    check_boxes = request.get_json(force=True)
-
-    stream = BytesIO
+    stream = BytesIO()
+    check_boxes = request.form.getlist('check_box')
+    print(check_boxes)
+    dir = os.getcwd()
     with ZipFile(stream, 'w') as zf:
         for check_box in check_boxes:
-            check_box.split('/')
-            user_name = check_box[1]
-            file_name = check_box[3]
+            splitted = check_box.split('/')
+            user_name = splitted[1]
+            file_name = splitted[3]
             user = Users.query.filter_by(user= user_name).first()
-            file = os.path.join(Config.CHEM_DIR, "dockings", str(user.id), file_name)
-            zf.write(file, os.path.basename(file))
+                
+            for file in glob(os.path.join(Config.CHEM_DIR, "dockings", str(user.id), file_name)):
+                print(os.path.join(Config.CHEM_DIR, "dockings", str(user.id), file_name))
+                print(os.path.basename(file))
+                zf.write(file, os.path.basename(file))
+            print(zf)
+
     stream.seek(0)
-    
     return send_file(stream, as_attachment=True, download_name="selected_ligands.zip")

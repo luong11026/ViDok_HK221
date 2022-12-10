@@ -90,38 +90,68 @@
               </div>
             </div>
             <div class="table-responsive-sm">
-              <table class="table table-striped" id="list_ligands">
-                <thead>
-                  <tr>
-                    <th scope="col">No.</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">
-                      <span>Score.</span>
-                      <button id="sort_button" onclick="sortScore()">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          fill="currentColor"
-                          class="bi bi-sort-numeric-down-alt"
-                          viewBox="0 0 16 16"
+              <form
+                action="{{url_for('download_selected') }}"
+                method="POST"
+                id="my_form"
+              >
+                <table class="table table-striped" id="list_ligands">
+                  <thead>
+                    <tr>
+                      <th scope="col">No.</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">
+                        <span>Score.</span>
+                        <button id="sort_button" onclick="sortScore()">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            fill="currentColor"
+                            class="bi bi-sort-numeric-down-alt"
+                            viewBox="0 0 16 16"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M11.36 7.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.836 1.973-1.836 1.09 0 2.063.637 2.063 2.688 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98z"
+                            />
+                            <path
+                              d="M12.438 8.668V14H11.39V9.684h-.051l-1.211.859v-.969l1.262-.906h1.046zM4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293V2.5z"
+                            />
+                          </svg>
+                        </button>
+                      </th>
+                      <th scope="col">User</th>
+                      <th scope="col">Download</th>
+                      <th scope="col">
+                        <button
+                          style="
+                            background: none;
+                            color: inherit;
+                            border: none;
+                            padding: 0;
+                            font: inherit;
+                            outline: inherit;
+                          "
+                          id="select_all"
+                          onclick="selectAll()"
+                          type="button"
                         >
-                          <path
-                            fill-rule="evenodd"
-                            d="M11.36 7.098c-1.137 0-1.708-.657-1.762-1.278h1.004c.058.223.343.45.773.45.824 0 1.164-.829 1.133-1.856h-.059c-.148.39-.57.742-1.261.742-.91 0-1.72-.613-1.72-1.758 0-1.148.848-1.836 1.973-1.836 1.09 0 2.063.637 2.063 2.688 0 1.867-.723 2.848-2.145 2.848zm.062-2.735c.504 0 .933-.336.933-.972 0-.633-.398-1.008-.94-1.008-.52 0-.927.375-.927 1 0 .64.418.98.934.98z"
-                          />
-                          <path
-                            d="M12.438 8.668V14H11.39V9.684h-.051l-1.211.859v-.969l1.262-.906h1.046zM4.5 2.5a.5.5 0 0 0-1 0v9.793l-1.146-1.147a.5.5 0 0 0-.708.708l2 1.999.007.007a.497.497 0 0 0 .7-.006l2-2a.5.5 0 0 0-.707-.708L4.5 12.293V2.5z"
-                          />
-                        </svg>
-                      </button>
-                    </th>
-                    <th scope="col">User</th>
-                    <th scope="col">Download</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
+                          Select
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+                <div class="d-flex justify-content-end">
+                  <input
+                    type="submit"
+                    value="Download all selected"
+                    class="btn btn-outline-tertiary"
+                  />
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -132,12 +162,6 @@
             <ul class="pagination justify-content-center" id="pagination"></ul>
           </nav>
         </div>
-        <div class="col-lg-4">
-          Number of selected: <span id="selected"></span>
-        </div>
-        <a class="col-lg-4" id="download_selected" href="/download_selected">
-          Download selected ligands
-        </a>
       </div>
     </div>
   </div>
@@ -159,47 +183,43 @@
   const searchButton = document.querySelector("#search_btn");
   const clearButton = document.querySelector("#clear_btn");
   const sortButton = document.querySelector("#sort_button");
-  const downloadSelectedButton = document.querySelector("#download_selected");
+  const selectAllButton = document.querySelector("#select_all");
+
+  function selectAll() {
+    let ele = document.getElementsByName("check_box");
+    if (ele[0].checked == false) {
+      for (let i = 0; i < ele.length; i++) {
+        ele[i].checked = true;
+      }
+    } else {
+      for (let i = 0; i < ele.length; i++) {
+        ele[i].checked = false;
+      }
+    }
+  }
 
   searchButton.addEventListener("click", function () {
     user_name = searchBox.value;
     loadData();
   });
 
+  // $("#select-all").onclick(function (event) {
+  //   if (this.checked) {
+  //     // Iterate each checkbox
+  //     $(":checkbox").each(function () {
+  //       this.checked = true;
+  //     });
+  //   } else {
+  //     $(":checkbox").each(function () {
+  //       this.checked = false;
+  //     });
+  //   }
+  // });
+
   clearButton.addEventListener("click", function () {
     user_name = "";
     searchBox.value = "";
     loadData();
-  });
-
-  downloadSelectedButton.addEventListener("click", function () {
-    let checkedBoxes = document.querySelectorAll(
-      "input[name=check_box]:checked"
-    );
-
-    if (checkedBoxes.length == 0 || checkedBoxes == NULL) {
-      alert("Please choose a designed ligand to download! ");
-      return;
-    }
-
-    let checkBoxesID = [];
-    for (let i = 0; i < checkedBoxes.length; i++) {
-      checkBoxesID.push(checkedBoxes[i].id);
-    }
-    console.log(checkBoxesID);
-
-    $.ajax({
-      url: "download_selected",
-      type: "POST",
-      dataType: "JSON",
-      data: JSON.stringify(checkBoxesID),
-    })
-      .done(function (results) {
-        console.log("Success");
-      })
-      .fail(function () {
-        alert("There are some error! Please refresh page!");
-      });
   });
 
   window.onload = (event) => {
@@ -295,7 +315,8 @@
       checkbox_button = document.createElement("input");
       checkbox_button.type = "checkbox";
       checkbox_button.name = "check_box";
-      checkbox_button.id = `${ligand["download"]}`;
+      checkbox_button.form = "my_form";
+      checkbox_button.value = `${ligand["download"]}`;
       c6.appendChild(checkbox_button);
       newRow.appendChild(c1);
       newRow.appendChild(c2);
