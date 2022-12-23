@@ -303,11 +303,13 @@ def view_ligands():
     only_me = data["only_me"]
     asc_score = data["asc_score"]
     user_name = data["user_name"]
-
+    start_range = data["start_range"]
+    end_range = data["end_range"]
+    
     if asc_score: 
-        list_ligands = Ligands.query.order_by(Ligands.score.asc())    
+        list_ligands = Ligands.query.order_by(Ligands.score.asc()).filter((Ligands.score < end_range) & (Ligands.score >= start_range))
     else:
-        list_ligands = Ligands.query.order_by(Ligands.score.desc())
+        list_ligands = Ligands.query.order_by(Ligands.score.desc()).filter((Ligands.score < end_range) & (Ligands.score >= start_range))
     result_list_ligands = list_ligands
 
     if user_name != "":

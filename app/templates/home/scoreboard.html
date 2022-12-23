@@ -52,9 +52,23 @@
                     <button class="btn btn-outline-primary" id="search_btn">
                       Search
                     </button>
-                    <button class="btn btn-outline-primary" id="clear_btn">
-                      Clear
+                  </div>
+
+                  <div style="margin-top: 10px">
+                    <label for="range" style="font-weight: bold"
+                      >Enter desired scores' range:
+                    </label>
+                    <input type="text" id="start_range" style="width: 60px" />
+                    <input type="text" id="end_range" style="width: 60px" />
+                    <button class="btn btn-outline-primary" id="filter_btn">
+                      Filter
                     </button>
+
+                    <div>
+                      <button class="btn btn-outline-primary clear_btn">
+                        Clear
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div
@@ -102,7 +116,11 @@
                       <th scope="col">Name</th>
                       <th scope="col">
                         <span>Score.</span>
-                        <button id="sort_button" onclick="sortScore()">
+                        <button
+                          id="sort_button"
+                          onclick="sortScore()"
+                          type="button"
+                        >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             width="16"
@@ -178,12 +196,17 @@
   var asc_score = false;
   var user_name = "";
   let max_pagination = 5;
+  let start_range = -100;
+  let end_range = 100;
 
   const searchBox = document.querySelector("#search_box");
   const searchButton = document.querySelector("#search_btn");
-  const clearButton = document.querySelector("#clear_btn");
+  const clearButton = document.querySelector(".clear_btn");
   const sortButton = document.querySelector("#sort_button");
   const selectAllButton = document.querySelector("#select_all");
+  const filterButton = document.querySelector("#filter_btn");
+  const startBox = document.querySelector("#start_range");
+  const endBox = document.querySelector("#end_range");
 
   function selectAll() {
     let ele = document.getElementsByName("check_box");
@@ -203,22 +226,19 @@
     loadData();
   });
 
-  // $("#select-all").onclick(function (event) {
-  //   if (this.checked) {
-  //     // Iterate each checkbox
-  //     $(":checkbox").each(function () {
-  //       this.checked = true;
-  //     });
-  //   } else {
-  //     $(":checkbox").each(function () {
-  //       this.checked = false;
-  //     });
-  //   }
-  // });
+  filterButton.addEventListener("click", function () {
+    start_range = startBox.value != "" ? startBox.value : -100;
+    end_range = endBox.value != "" ? endBox.value : 100;
+    loadData();
+  });
 
   clearButton.addEventListener("click", function () {
     user_name = "";
     searchBox.value = "";
+    start_range = -100;
+    end_range = 100;
+    startBox.value = "";
+    endBox.value = "";
     loadData();
   });
 
@@ -249,6 +269,8 @@
         only_me: only_me,
         asc_score: asc_score,
         user_name: user_name,
+        start_range: start_range,
+        end_range: end_range,
       }),
     })
       .done(function (results) {
